@@ -34,6 +34,9 @@ export function buildPollinationsUrl(
 ): string {
   const size = opts.size ?? 512;
   const model = opts.model ?? "flux";
+  const base = (
+    process.env.POLLINATIONS_BASE_URL || "https://image.pollinations.ai"
+  ).replace(/\/$/, "");
   const prompt = `${name}, ${topic}, professional product photo, centered subject, studio lighting, clean background, high detail`;
   const seed = seedFrom(`${topic}:${name}`);
   const params = new URLSearchParams({
@@ -43,7 +46,7 @@ export function buildPollinationsUrl(
     model,
     nologo: "true",
   });
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${params}`;
+  return `${base}/prompt/${encodeURIComponent(prompt)}?${params}`;
 }
 
 /**

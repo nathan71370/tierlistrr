@@ -144,8 +144,70 @@ export async function addItem(formData: FormData) {
   await touch(tierlistId);
 }
 
-// AI pre-fill: generate item names (Groq) + key-less images (Pollinations),
-// dropping the new items into the unranked pool.
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Run an async mapper over items with a bounded number of workers.
+async function mapPool<T, R>(
+  list: T[],
+  concurrency: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(list.length);
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < list.length) {
+      const i = cursor++;
+      results[i] = await fn(list[i], i);
+    }
+  };
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, list.length) }, worker),
+  );
+  return results;
+}
+
+// Download a generated image to disk, with retry/backoff on rate limits.
+// Returns the local /api/uploads path, or null if it ultimately fails.
+async function downloadImage(url: string): Promise<string | null> {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30_000);
+      let res: Response;
+      try {
+        res = await fetch(url, { signal: controller.signal });
+      } finally {
+        clearTimeout(timeout);
+      }
+      if (res.status === 429 || res.status >= 500) {
+        await sleep(1500 * (attempt + 1));
+        continue;
+      }
+      if (!res.ok) return null;
+      const type = (res.headers.get("content-type") ?? "image/jpeg")
+        .split(";")[0]
+        .trim();
+      const ext = MIME_EXT[type] ?? "jpg";
+      const buffer = Buffer.from(await res.arrayBuffer());
+      if (buffer.byteLength === 0) {
+        await sleep(1200 * (attempt + 1));
+        continue;
+      }
+      const filename = `${nanoid()}.${ext}`;
+      await fs.mkdir(UPLOADS_DIR, { recursive: true });
+      await fs.writeFile(path.join(UPLOADS_DIR, filename), buffer);
+      return `/api/uploads/${filename}`;
+    } catch {
+      await sleep(1200 * (attempt + 1));
+    }
+  }
+  return null;
+}
+
+// AI pre-fill: generate item names (Groq) + images (Pollinations). Images are
+// fetched server-side with bounded concurrency and cached to disk, so the
+// browser never bursts requests at Pollinations (avoids 429). If a download
+// fails, we fall back to the hotlinked Pollinations URL for that item.
 export async function generateItems(
   tierlistId: string,
   topic: string,
@@ -158,6 +220,10 @@ export async function generateItems(
 
   const names = await generateItemNames(cleanTopic, n);
 
+  // Low concurrency + retry keeps us well under Pollinations' rate limits.
+  const urls = names.map((name) => buildPollinationsUrl(name, cleanTopic));
+  const localPaths = await mapPool(urls, 2, (url) => downloadImage(url));
+
   const pool = await db
     .select({ position: items.position })
     .from(items)
@@ -166,12 +232,12 @@ export async function generateItems(
 
   const now = new Date();
   await db.insert(items).values(
-    names.map((name) => ({
+    names.map((name, i) => ({
       id: nanoid(),
       tierlistId,
       tierId: null,
       name,
-      imagePath: buildPollinationsUrl(name, cleanTopic),
+      imagePath: localPaths[i] ?? urls[i],
       position: nextPos++,
       createdAt: now,
     })),

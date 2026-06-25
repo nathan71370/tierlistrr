@@ -47,6 +47,7 @@ Variables d'environnement :
 | `GROQ_API_KEY`  | Active la génération IA d'éléments (clé Groq gratuite)        | — (IA désactivée)    |
 | `GROQ_MODEL`    | Modèle LLM utilisé                                            | `llama-3.3-70b-versatile` |
 | `GROQ_BASE_URL` | Endpoint compatible OpenAI (pour pointer ailleurs que Groq)  | `https://api.groq.com/openai/v1` |
+| `POLLINATIONS_BASE_URL` | Base du service d'images (pour self-host/proxy)     | `https://image.pollinations.ai` |
 
 Pour persister les données, montez un volume sur `DATA_DIR` (la base + le dossier
 `uploads/` y vivent). C'est tout ce qu'il faut sauvegarder.
@@ -57,8 +58,9 @@ Sans `GROQ_API_KEY`, l'app fonctionne normalement et le bouton « Générer » e
 simplement masqué. Avec une clé (gratuite sur [console.groq.com](https://console.groq.com)),
 le board affiche **Générer** : l'IA propose des éléments pour le thème de la liste
 et leur associe une image générée par [Pollinations](https://pollinations.ai)
-(aucune clé requise). Les images IA sont liées depuis Pollinations (hotlink) ;
-les uploads manuels, eux, restent stockés sur disque.
+(aucune clé requise). Les images sont **téléchargées côté serveur** (concurrence
+limitée + retries pour éviter les 429) et **stockées sur disque** comme les
+uploads manuels.
 
 ## Déploiement Docker / Komodo
 
@@ -111,8 +113,9 @@ en une passe.
 - [x] **Base** — création / visualisation / édition de tier lists, drag & drop, photos
 - [x] **IA** — bouton « Générer » : Groq propose les éléments du thème, Pollinations
   génère les images, le tout atterrit dans « à classer »
+- [x] **Images IA sur disque** — téléchargées et persistées (concurrence limitée
+  + retries), plus de hotlink ni de 429 à l'affichage
 - [ ] Réordonnancement des tiers par glisser-déposer
-- [ ] Cache disque des images IA (au lieu du hotlink Pollinations)
 - [ ] Export image de la tier list
 
 ## Licence

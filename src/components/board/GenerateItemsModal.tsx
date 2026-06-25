@@ -45,8 +45,10 @@ export function GenerateItemsModal({
     <Modal open={open} onClose={onClose} title="Générer avec l'IA">
       <div className="space-y-5">
         <p className="text-sm leading-relaxed text-ink-soft">
-          L&apos;IA propose une liste d&apos;éléments pour ton thème et leur génère
-          une image. Tout arrive dans « à classer » — à toi de ranger ensuite.
+          L&apos;IA propose une liste d&apos;éléments pour ton thème et génère une
+          image pour chacun. Les images sont téléchargées et enregistrées, donc
+          la génération peut prendre quelques secondes. Tout arrive dans « à
+          classer ».
         </p>
 
         <div>
@@ -88,7 +90,7 @@ export function GenerateItemsModal({
         ) : null}
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-[11px] text-muted">Images via Pollinations · sans clé</span>
+          <span className="text-[11px] text-muted">Images via Pollinations · enregistrées sur disque</span>
           <div className="flex gap-2">
             <Button type="button" variant="ghost" onClick={onClose} disabled={pending}>
               Annuler
