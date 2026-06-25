@@ -2,15 +2,15 @@ import Link from "next/link";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-line bg-paper/90 backdrop-blur sticky top-0 z-30">
+    <header className="sticky top-0 z-30 border-b border-line bg-paper/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-        <Link href="/" className="group flex items-baseline gap-2">
-          <span className="display text-2xl font-bold tracking-tight text-ink">
+        <Link href="/" className="group flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-sage transition-transform group-hover:scale-125" />
+          <span className="display text-[28px] italic leading-none text-ink">
             tierlistrr
           </span>
-          <span className="h-2 w-2 rounded-full bg-terracotta transition-transform group-hover:scale-125" />
         </Link>
-        <span className="label hidden sm:block">Range tout. Vraiment tout.</span>
+        <span className="kicker hidden sm:block">Range tout · vraiment tout</span>
       </div>
     </header>
   );

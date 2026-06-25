@@ -35,7 +35,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 sm:p-8 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/30 p-4 sm:p-8 backdrop-blur-[3px]"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -44,22 +44,22 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative mt-8 w-full max-w-lg border border-line bg-surface shadow-2xl",
-          "rounded-[3px]",
+          "relative mt-6 w-full max-w-lg bg-surface rounded-[var(--radius-lg)]",
+          "shadow-[var(--shadow-pop)] border border-line/60",
           className,
         )}
       >
-        <div className="flex items-center justify-between border-b border-line px-5 py-4">
-          <h2 className="display text-lg font-bold text-ink">{title}</h2>
+        <div className="flex items-center justify-between px-6 pt-5 pb-4">
+          <h2 className="display text-2xl text-ink">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Fermer"
-            className="grid h-8 w-8 place-items-center rounded-[3px] text-muted hover:bg-beige-soft hover:text-ink"
+            className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-cream-deep hover:text-ink transition-colors"
           >
             <X size={18} />
           </button>
         </div>
-        <div className="px-5 py-5">{children}</div>
+        <div className="px-6 pb-6">{children}</div>
       </div>
     </div>
   );

@@ -2,15 +2,16 @@
 
 /*
   marathon design system — warm editorial palette.
-  Paper background, ink text, terracotta accent, sage for the positive.
-  Display/numbers: Georgia (serif). UI/labels: Arial (sans), uppercase + tracked.
+  Cream paper, ink text, terracotta accent, sage for the positive.
+  Display: Instrument Serif (italic for emphasis). UI: Inter.
+  Generous radii, soft layered shadows, kickers in tracked uppercase.
 */
 @theme {
   --color-paper: #f7f5f0;
+  --color-paper-deep: #ece7dc;
   --color-surface: #ffffff;
-  --color-beige: #e5ddd0;
-  --color-beige-soft: #efeae0;
-  --color-beige-faint: #ece7dc;
+  --color-cream: #f7f5f0;
+  --color-cream-deep: #efeae0;
 
   --color-ink: #1a1614;
   --color-ink-soft: #4a4340;
@@ -20,14 +21,27 @@
   --color-terracotta: #d85b3d;
   --color-terracotta-dark: #b84527;
   --color-terracotta-light: #e89178;
-
   --color-sage: #6b8e65;
   --color-sage-dark: #4d6b48;
 
-  --font-sans: Arial, Helvetica, "Helvetica Neue", sans-serif;
-  --font-serif: Georgia, "Times New Roman", Times, serif;
+  /* tier / training-zone palette from the design system (calm → intense) */
+  --color-z1: #b9c6b3;
+  --color-z2: #6b8e65;
+  --color-z3: #e89178;
+  --color-z4: #d85b3d;
+  --color-z5: #b84527;
 
-  --radius-card: 3px;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-instrument), Georgia, "Times New Roman", serif;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+
+  --shadow-card: 0 1px 2px rgba(26, 22, 20, 0.04), 0 4px 16px rgba(26, 22, 20, 0.05);
+  --shadow-pop: 0 2px 4px rgba(26, 22, 20, 0.06), 0 12px 32px rgba(26, 22, 20, 0.1);
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.15, 1);
 }
 
 html {
@@ -42,24 +56,34 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Small uppercase tracked label — the marathon signature. */
-.label {
+/* Small uppercase tracked label — the marathon signature kicker. */
+.kicker {
   font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   font-size: 0.6875rem;
-  line-height: 1;
-  font-weight: 700;
+  line-height: 1.1;
+  font-weight: 600;
   color: var(--color-muted);
 }
 
 /* Editorial serif display. */
 .display {
   font-family: var(--font-serif);
+  font-weight: 400;
   letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.display em,
+.italic-serif {
+  font-style: italic;
 }
 
 ::selection {
   background: var(--color-terracotta);
   color: #fff;
+}
+
+* {
+  border-color: var(--color-line);
 }

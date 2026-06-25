@@ -12,7 +12,7 @@ export function TierlistCard({ list }: { list: TierlistSummary }) {
   const [pending, start] = useTransition();
 
   return (
-    <div className="group relative flex flex-col border border-line bg-surface rounded-[3px] transition-colors hover:border-ink/30">
+    <div className="group relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-line bg-surface shadow-[var(--shadow-card)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-pop)]">
       <button
         onClick={() => {
           if (confirm(`Supprimer « ${list.title} » ? Cette action est définitive.`)) {
@@ -23,13 +23,13 @@ export function TierlistCard({ list }: { list: TierlistSummary }) {
         }}
         disabled={pending}
         aria-label="Supprimer"
-        className="absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-[3px] bg-surface/80 text-muted opacity-0 transition group-hover:opacity-100 hover:bg-terracotta hover:text-white"
+        className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-surface/90 text-muted opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-terracotta hover:text-white"
       >
         <Trash2 size={15} />
       </button>
 
       <Link href={`/t/${list.slug}`} className="flex flex-1 flex-col">
-        <div className="flex h-28 items-center gap-1 overflow-hidden border-b border-line bg-beige-soft px-4">
+        <div className="flex h-28 items-center gap-2 overflow-hidden bg-cream-deep px-4">
           {list.thumbs.length > 0 ? (
             list.thumbs.map((src, i) => (
               // eslint-disable-next-line @next/next/no-img-element
@@ -37,22 +37,22 @@ export function TierlistCard({ list }: { list: TierlistSummary }) {
                 key={i}
                 src={src}
                 alt=""
-                className="h-16 w-16 shrink-0 rounded-[2px] object-cover ring-1 ring-line"
+                className="h-16 w-16 shrink-0 rounded-[var(--radius-sm)] object-cover shadow-[var(--shadow-card)]"
               />
             ))
           ) : (
-            <span className="label">Vide — ajoute des éléments</span>
+            <span className="kicker">Vide — ajoute des éléments</span>
           )}
         </div>
-        <div className="flex flex-1 flex-col gap-2 p-4">
-          <h3 className="display text-lg font-bold leading-snug text-ink">
-            {list.title}
-          </h3>
+        <div className="flex flex-1 flex-col gap-2 p-5">
+          <h3 className="display text-2xl text-ink">{list.title}</h3>
           {list.description ? (
-            <p className="line-clamp-2 text-sm text-ink-soft">{list.description}</p>
+            <p className="line-clamp-2 text-sm leading-relaxed text-ink-soft">
+              {list.description}
+            </p>
           ) : null}
-          <div className="mt-auto flex items-center justify-between pt-2">
-            <span className="label">
+          <div className="mt-auto flex items-center justify-between pt-3">
+            <span className="kicker">
               {list.itemCount} élément{list.itemCount > 1 ? "s" : ""}
             </span>
             <span className="text-[11px] text-muted">{fmt.format(list.updatedAt)}</span>

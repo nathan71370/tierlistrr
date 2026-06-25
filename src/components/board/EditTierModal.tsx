@@ -65,7 +65,7 @@ export function EditTierModal({
                 onClick={() => setColor(c)}
                 aria-label={c}
                 className={cn(
-                  "h-9 w-9 rounded-[3px] ring-2 ring-offset-2 ring-offset-surface transition",
+                  "h-9 w-9 rounded-[var(--radius-sm)] ring-2 ring-offset-2 ring-offset-surface transition",
                   color.toLowerCase() === c.toLowerCase()
                     ? "ring-ink"
                     : "ring-transparent hover:ring-line",

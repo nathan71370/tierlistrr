@@ -21,7 +21,7 @@ function SubmitButton() {
 export function CreateTierlistButton({
   variant = "primary",
 }: {
-  variant?: "primary" | "outline";
+  variant?: "primary" | "secondary";
 }) {
   const [open, setOpen] = useState(false);
   return (

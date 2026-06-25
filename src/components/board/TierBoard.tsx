@@ -38,7 +38,6 @@ export function TierBoard({
   );
   const [saving, startSaving] = useTransition();
 
-  // Modal state.
   const [addOpen, setAddOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editTier, setEditTier] = useState<Tier | null>(null);
@@ -46,7 +45,6 @@ export function TierBoard({
   const [addingTier, startAddTier] = useTransition();
 
   // Re-sync local state whenever the server sends fresh data (after a refresh).
-  // Officially-recommended "adjust state during render" pattern — no effect.
   const sig = useMemo(
     () =>
       JSON.stringify([
@@ -101,26 +99,28 @@ export function TierBoard({
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-7">
         <Link
           href="/"
-          className="label inline-flex items-center gap-1.5 text-muted hover:text-ink"
+          className="kicker inline-flex items-center gap-1.5 hover:text-ink"
         >
           <ArrowLeft size={13} /> Toutes les listes
         </Link>
-        <div className="mt-3 flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mt-4 flex flex-col gap-5 border-b border-line pb-7 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <h1 className="display text-3xl font-bold leading-tight text-ink sm:text-4xl">
+            <h1 className="display text-4xl text-ink sm:text-5xl">
               {tierlist.title}
             </h1>
             {tierlist.description ? (
-              <p className="mt-2 text-sm text-ink-soft">{tierlist.description}</p>
+              <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+                {tierlist.description}
+              </p>
             ) : null}
           </div>
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "label inline-flex items-center gap-1.5 transition-opacity",
+                "kicker inline-flex items-center gap-1.5 transition-opacity",
                 saving ? "opacity-100" : "opacity-0",
               )}
             >
@@ -134,7 +134,7 @@ export function TierBoard({
                 </>
               )}
             </span>
-            <Button variant="outline" onClick={() => setSettingsOpen(true)}>
+            <Button variant="secondary" onClick={() => setSettingsOpen(true)}>
               <Settings2 size={15} />
               Réglages
             </Button>
@@ -148,16 +148,16 @@ export function TierBoard({
 
       {/* Tiers */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="overflow-hidden border border-line bg-surface rounded-[3px]">
+        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-line bg-surface shadow-[var(--shadow-card)]">
           {tiers.map((tier) => (
             <div key={tier.id} className="flex border-b border-line last:border-b-0">
               <button
                 onClick={() => setEditTier(tier)}
-                className="flex w-20 shrink-0 items-center justify-center px-2 py-3 text-center transition hover:brightness-95 sm:w-24"
+                className="flex w-[68px] shrink-0 items-center justify-center px-2 py-3 text-center transition hover:brightness-105 sm:w-24"
                 style={{ backgroundColor: tier.color }}
                 title="Modifier ce tier"
               >
-                <span className="display break-words text-2xl font-bold leading-none text-white drop-shadow-sm">
+                <span className="display break-words text-3xl leading-none text-white drop-shadow-sm">
                   {tier.label}
                 </span>
               </button>
@@ -167,8 +167,8 @@ export function TierBoard({
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={cn(
-                      "flex min-h-[104px] flex-1 flex-wrap content-start gap-2 p-2 transition-colors",
-                      snapshot.isDraggingOver ? "bg-beige-soft" : "bg-surface",
+                      "flex min-h-[100px] flex-1 flex-wrap content-start gap-2.5 p-2.5 transition-colors",
+                      snapshot.isDraggingOver ? "bg-cream-deep" : "bg-surface",
                     )}
                   >
                     {(groups[tier.id] ?? []).map((item, idx) => (
@@ -192,10 +192,12 @@ export function TierBoard({
             variant="ghost"
             size="sm"
             disabled={addingTier}
-            onClick={() => startAddTier(async () => {
-              await addTier(tierlist.id);
-              refresh();
-            })}
+            onClick={() =>
+              startAddTier(async () => {
+                await addTier(tierlist.id);
+                refresh();
+              })
+            }
           >
             <Plus size={14} />
             Ajouter un tier
@@ -203,9 +205,9 @@ export function TierBoard({
         </div>
 
         {/* Pool */}
-        <div className="mt-8">
-          <div className="mb-2 flex items-baseline justify-between">
-            <h2 className="label">À classer</h2>
+        <div className="mt-9">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="kicker">À classer</h2>
             <span className="text-[11px] text-muted">{pool.length} en attente</span>
           </div>
           <Droppable droppableId={POOL_ID} direction="horizontal">
@@ -214,10 +216,10 @@ export function TierBoard({
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 className={cn(
-                  "flex min-h-[120px] flex-wrap content-start gap-2 border border-dashed p-3 rounded-[3px] transition-colors",
+                  "flex min-h-[116px] flex-wrap content-start gap-2.5 rounded-[var(--radius-lg)] border border-dashed p-3.5 transition-colors",
                   snapshot.isDraggingOver
-                    ? "border-terracotta bg-beige-soft"
-                    : "border-line bg-surface/60",
+                    ? "border-terracotta bg-cream-deep"
+                    : "border-line bg-surface/50",
                 )}
               >
                 {pool.length === 0 && !snapshot.isDraggingOver ? (
@@ -293,19 +295,20 @@ function DraggableItem({
           {...provided.dragHandleProps}
           onClick={onClick}
           className={cn(
-            "group flex w-20 cursor-grab flex-col items-center active:cursor-grabbing",
+            "group flex w-[72px] cursor-grab flex-col items-center active:cursor-grabbing",
             snapshot.isDragging && "z-50",
           )}
         >
           <div
             className={cn(
-              "overflow-hidden rounded-[3px] ring-1 ring-line transition group-hover:ring-ink/40",
-              snapshot.isDragging && "shadow-xl ring-terracotta",
+              "overflow-hidden rounded-[var(--radius-sm)] shadow-[var(--shadow-card)] ring-1 ring-line/70 transition",
+              "group-hover:ring-ink/30 group-hover:shadow-[var(--shadow-pop)]",
+              snapshot.isDragging && "ring-terracotta shadow-[var(--shadow-pop)] rotate-2",
             )}
           >
             <ItemThumb item={item} />
           </div>
-          <span className="mt-1 w-full truncate text-center text-[11px] leading-tight text-ink-soft">
+          <span className="mt-1.5 w-full truncate text-center text-[11px] leading-tight text-ink-soft">
             {item.name}
           </span>
         </div>

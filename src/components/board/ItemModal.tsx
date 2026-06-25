@@ -44,7 +44,7 @@ export function ItemModal({
     <Modal open={open} onClose={onClose} title="Élément">
       <div className="space-y-5">
         <div className="flex items-center gap-4">
-          <ItemThumb item={item} className="rounded-[3px] ring-1 ring-line" />
+          <ItemThumb item={item} className="rounded-[var(--radius-sm)] ring-1 ring-line" />
           <div className="flex-1">
             <Label htmlFor="item-rename">Nom</Label>
             <Input

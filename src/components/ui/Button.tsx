@@ -1,26 +1,26 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "ink" | "outline" | "ghost" | "danger";
+type Variant = "primary" | "ink" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-terracotta text-white hover:bg-terracotta-dark",
+  primary: "bg-terracotta text-white hover:bg-terracotta-dark shadow-[0_1px_2px_rgba(26,22,20,0.08)]",
   ink: "bg-ink text-paper hover:bg-black",
-  outline: "border border-ink/25 text-ink hover:border-ink hover:bg-ink hover:text-paper",
-  ghost: "text-ink-soft hover:bg-beige-soft",
-  danger: "border border-terracotta/40 text-terracotta hover:bg-terracotta hover:text-white",
+  secondary: "bg-surface text-ink border border-line hover:border-ink/30 shadow-[0_1px_2px_rgba(26,22,20,0.04)]",
+  ghost: "text-ink-soft hover:bg-cream-deep",
+  danger: "text-terracotta hover:bg-terracotta hover:text-white border border-terracotta/30",
 };
 
 const SIZES: Record<Size, string> = {
-  sm: "h-8 px-3 text-[11px]",
-  md: "h-10 px-4 text-xs",
+  sm: "h-9 px-4 text-[13px]",
+  md: "h-11 px-5 text-sm",
 };
 
 export function buttonClasses(variant: Variant = "primary", size: Size = "md") {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-[3px] font-bold uppercase tracking-[0.1em]",
-    "transition-colors duration-150 cursor-pointer select-none",
+    "inline-flex items-center justify-center gap-2 rounded-full font-semibold",
+    "transition-colors duration-150 cursor-pointer select-none whitespace-nowrap",
     "disabled:opacity-40 disabled:pointer-events-none",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta",
     SIZES[size],

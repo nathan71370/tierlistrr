@@ -16,18 +16,18 @@ export function ItemThumb({
         src={item.imagePath}
         alt={item.name}
         draggable={false}
-        className={cn("h-20 w-20 object-cover", className)}
+        className={cn("h-[72px] w-[72px] object-cover", className)}
       />
     );
   }
   return (
     <div
       className={cn(
-        "grid h-20 w-20 place-items-center bg-beige text-ink-soft",
+        "grid h-[72px] w-[72px] place-items-center bg-cream-deep text-ink-soft",
         className,
       )}
     >
-      <span className="display text-2xl font-bold">{initials(item.name)}</span>
+      <span className="display text-2xl italic">{initials(item.name)}</span>
     </div>
   );
 }

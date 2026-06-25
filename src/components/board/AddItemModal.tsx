@@ -72,12 +72,12 @@ export function AddItemModal({
 
         <div>
           <Label>Photo (optionnel)</Label>
-          <label className="flex cursor-pointer items-center gap-4 border border-dashed border-line bg-surface px-4 py-3 hover:border-terracotta">
+          <label className="flex cursor-pointer items-center gap-4 rounded-[var(--radius-md)] border border-dashed border-line bg-paper px-4 py-3 hover:border-terracotta">
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="" className="h-16 w-16 rounded-[2px] object-cover" />
+              <img src={preview} alt="" className="h-16 w-16 rounded-[var(--radius-sm)] object-cover" />
             ) : (
-              <span className="grid h-16 w-16 place-items-center bg-beige text-muted">
+              <span className="grid h-16 w-16 place-items-center rounded-[var(--radius-sm)] bg-cream-deep text-muted">
                 <ImagePlus size={22} />
               </span>
             )}
@@ -100,7 +100,7 @@ export function AddItemModal({
         {error ? <p className="text-sm text-terracotta">{error}</p> : null}
 
         <div className="flex items-center justify-between pt-1">
-          <span className="label">
+          <span className="kicker">
             {added > 0 ? `${added} ajouté${added > 1 ? "s" : ""}` : "Astuce : enchaîne les ajouts"}
           </span>
           <div className="flex gap-2">
