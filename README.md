@@ -1,0 +1,84 @@
+# tierlistrr
+
+Crée, visualise et range **n'importe quelle** tier list — fromages, sauces piquantes,
+cocktails… — en glissant des éléments (avec photos) du meilleur au pire.
+
+Remake open source de [OpenTierBoy](https://github.com/infinia-yzl/opentierboy),
+pensé pour l'auto-hébergement : pas de compte, pas de connexion, une seule base
+SQLite. On arrive sur la page d'accueil, on voit toutes les tier lists, on en crée
+une, on la visualise ou on la modifie.
+
+## Stack
+
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS v4** — tokens du design system *marathon* (voir plus bas)
+- **Drizzle ORM** sur **libSQL/SQLite** (`@libsql/client`, fichier local)
+- **@hello-pangea/dnd** pour le glisser-déposer
+- Server Actions pour toutes les mutations, images stockées sur disque
+
+## Démarrer en développement
+
+```bash
+npm install
+npm run dev
+# http://localhost:3000
+```
+
+La base et le dossier d'uploads sont créés automatiquement au premier lancement
+dans `./data` (ignoré par git). Aucune étape de migration : le schéma est appliqué
+de façon idempotente au démarrage.
+
+## Auto-hébergement (production)
+
+```bash
+npm run build
+npm run start          # PORT=3000 par défaut
+```
+
+Variables d'environnement :
+
+| Variable        | Rôle                                                         | Défaut               |
+| --------------- | ------------------------------------------------------------ | -------------------- |
+| `DATA_DIR`      | Dossier de la base SQLite **et** des images uploadées        | `./data`             |
+| `DATABASE_URL`  | URL libSQL explicite (ex. `file:/var/lib/tierlistrr/app.db`) | dérivé de `DATA_DIR` |
+| `PORT`          | Port HTTP                                                     | `3000`               |
+
+Pour persister les données, montez un volume sur `DATA_DIR` (la base + le dossier
+`uploads/` y vivent). C'est tout ce qu'il faut sauvegarder.
+
+## Modèle de données
+
+- **tierlists** — `id`, `slug`, `title`, `description`, timestamps
+- **tiers** — `id`, `tierlistId`, `label`, `color`, `position`
+- **items** — `id`, `tierlistId`, `tierId` *(null = pool « à classer »)*, `name`,
+  `imagePath`, `position`
+
+Chaque liste démarre avec 5 tiers (S, A, B, C, D) renommables/recolorables, et un
+pool « à classer » qui reçoit les nouveaux éléments.
+
+## Design system « marathon »
+
+L'identité visuelle suit le design system *marathon* : palette chaleureuse et
+éditoriale — fond papier `#f7f5f0`, encre `#1a1614`, accent terracotta `#d85b3d`,
+vert sauge `#6b8e65` —, titres et chiffres en serif (Georgia), libellés en
+capitales trackées (Arial). Tous les tokens sont centralisés dans
+[`src/app/globals.css`](src/app/globals.css) (`@theme`), ce qui permet de re-skinner
+en une passe.
+
+> Le projet source vit dans Claude Design. Pour resynchroniser les composants, on
+> utilise le MCP `claude_design` depuis le CLI desktop (`/design-login` requis,
+> indisponible en session web).
+
+## Feuille de route
+
+- [x] **Base** — création / visualisation / édition de tier lists, drag & drop, photos
+- [ ] **IA (phase 2)** — pré-remplissage d'une tier list nouvellement créée :
+  - **Groq** (LLM gratuit) pour générer la liste d'éléments (ex. « cocktails » →
+    Moscow Mule, Caïpirinha, Negroni…)
+  - **Pollinations.ai** (images génératives gratuites, sans clé) pour les visuels
+- [ ] Réordonnancement des tiers par glisser-déposer
+- [ ] Export image de la tier list
+
+## Licence
+
+Open source. Remake inspiré d'OpenTierBoy.

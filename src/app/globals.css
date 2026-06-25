@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+/*
+  marathon design system — warm editorial palette.
+  Paper background, ink text, terracotta accent, sage for the positive.
+  Display/numbers: Georgia (serif). UI/labels: Arial (sans), uppercase + tracked.
+*/
+@theme {
+  --color-paper: #f7f5f0;
+  --color-surface: #ffffff;
+  --color-beige: #e5ddd0;
+  --color-beige-soft: #efeae0;
+  --color-beige-faint: #ece7dc;
+
+  --color-ink: #1a1614;
+  --color-ink-soft: #4a4340;
+  --color-muted: #8a8076;
+  --color-line: #e5ddd0;
+
+  --color-terracotta: #d85b3d;
+  --color-terracotta-dark: #b84527;
+  --color-terracotta-light: #e89178;
+
+  --color-sage: #6b8e65;
+  --color-sage-dark: #4d6b48;
+
+  --font-sans: Arial, Helvetica, "Helvetica Neue", sans-serif;
+  --font-serif: Georgia, "Times New Roman", Times, serif;
+
+  --radius-card: 3px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Small uppercase tracked label — the marathon signature. */
+.label {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
+/* Editorial serif display. */
+.display {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--color-terracotta);
+  color: #fff;
+}
