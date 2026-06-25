@@ -1,11 +1,15 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
+export * from "./auth-schema";
+
 export const tierlists = sqliteTable("tierlists", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   description: text("description"),
+  // null for lists created before auth existed.
+  ownerId: text("owner_id"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });

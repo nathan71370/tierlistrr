@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Plus } from "lucide-react";
 import { createTierlist } from "@/lib/actions";
+import { useSession } from "@/lib/auth-client";
+import { SignInModal } from "./auth/SignInModal";
 import { Modal } from "./ui/Modal";
 import { Button, buttonClasses } from "./ui/Button";
 import { Label, Input, Textarea } from "./ui/Field";
@@ -23,13 +25,23 @@ export function CreateTierlistButton({
 }: {
   variant?: "primary" | "secondary";
 }) {
+  const { data } = useSession();
   const [open, setOpen] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
+
+  function onClick() {
+    if (data?.user) setOpen(true);
+    else setSignInOpen(true);
+  }
+
   return (
     <>
-      <Button variant={variant} onClick={() => setOpen(true)}>
+      <Button variant={variant} onClick={onClick}>
         <Plus size={16} />
         Nouvelle tier list
       </Button>
+
+      <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
 
       <Modal open={open} onClose={() => setOpen(false)} title="Nouvelle tier list">
         <form action={createTierlist} className="space-y-4">

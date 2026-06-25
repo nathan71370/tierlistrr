@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeaderAuth } from "@/components/auth/HeaderAuth";
 
 export function SiteHeader() {
   return (
@@ -10,7 +11,7 @@ export function SiteHeader() {
             tierlistrr
           </span>
         </Link>
-        <span className="kicker hidden sm:block">Range tout · vraiment tout</span>
+        <HeaderAuth />
       </div>
     </header>
   );

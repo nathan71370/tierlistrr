@@ -1,16 +1,24 @@
 "use server";
 
 import { nanoid } from "nanoid";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { tierlists, tiers, items } from "@/db/schema";
+import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { DEFAULT_TIERS } from "@/lib/constants";
 import { generateItemNames } from "@/lib/ai";
 import { saveImageFile, removeImage } from "@/lib/images";
 import { enqueueImage } from "@/lib/imageQueue";
+
+async function requireUser() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) throw new Error("Connecte-toi pour faire ça.");
+  return session.user;
+}
 
 async function tierlistTitle(id: string): Promise<string> {
   const r = await db
@@ -33,6 +41,7 @@ async function touch(tierlistId: string) {
 // ---------------------------------------------------------------------------
 
 export async function createTierlist(formData: FormData) {
+  const user = await requireUser();
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   if (!title) throw new Error("Le titre est obligatoire.");
@@ -46,6 +55,7 @@ export async function createTierlist(formData: FormData) {
     slug,
     title,
     description: description || null,
+    ownerId: user.id,
     createdAt: now,
     updatedAt: now,
   });

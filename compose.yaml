@@ -16,6 +16,16 @@ services:
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
       GROQ_MODEL: "${GROQ_MODEL:-llama-3.3-70b-versatile}"
       GROQ_BASE_URL: "${GROQ_BASE_URL:-https://api.groq.com/openai/v1}"
+      POLLINATIONS_TOKEN: "${POLLINATIONS_TOKEN:-}"
+      # Auth (better-auth). BETTER_AUTH_SECRET is REQUIRED in prod (random string).
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:-}"
+      BETTER_AUTH_URL: "${BETTER_AUTH_URL:-https://tierlistrr.example.com}"
+      # Email OTP delivery (Gmail Workspace: smtp.gmail.com + app password).
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASS: "${SMTP_PASS:-}"
+      SMTP_FROM: "${SMTP_FROM:-tierlistrr <you@example.com>}"
     volumes:
       - tierlistrr-data:/data
     networks:

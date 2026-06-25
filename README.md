@@ -17,6 +17,7 @@ une, on la visualise ou on la modifie.
 - Server Actions pour toutes les mutations, images stockées sur disque
 - **IA** : génération d'éléments via **Groq** (API compatible OpenAI) + images
   via **Pollinations** (sans clé)
+- **Auth** : **better-auth** (code OTP par email, sans mot de passe), emails via SMTP
 
 ## Démarrer en développement
 
@@ -50,6 +51,11 @@ Variables d'environnement :
 | `POLLINATIONS_BASE_URL` | Base du service d'images (pour self-host/proxy)     | `https://image.pollinations.ai` |
 | `POLLINATIONS_TOKEN` | Token gratuit (auth.pollinations.ai) : limites plus hautes, pas de file | — |
 | `IMAGE_CONCURRENCY` | Nb d'images générées en parallèle en arrière-plan       | `2` |
+| `BETTER_AUTH_SECRET` | **Requis en prod** : secret aléatoire (`openssl rand -base64 32`) | — |
+| `BETTER_AUTH_URL` | URL publique de l'app (pour les cookies/CSRF)             | déduit de la requête |
+| `SMTP_HOST` / `SMTP_PORT` | Serveur SMTP pour l'envoi des codes OTP (Gmail : `smtp.gmail.com` / `587`) | — |
+| `SMTP_USER` / `SMTP_PASS` | Identifiants SMTP (Gmail : email + **mot de passe d'application**) | — |
+| `SMTP_FROM` | Adresse d'expéditeur des emails                          | `SMTP_USER` |
 
 Pour persister les données, montez un volume sur `DATA_DIR` (la base + le dossier
 `uploads/` y vivent). C'est tout ce qu'il faut sauvegarder.
