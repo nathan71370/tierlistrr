@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { items, tierlists } from "@/db/schema";
-import { buildPollinationsUrl } from "@/lib/ai";
+import { imagePromptFor, pollinationsUrlForPrompt } from "@/lib/ai";
 import { downloadImage } from "@/lib/images";
 
 // In-process background image generator. Items are created instantly with
@@ -34,7 +34,9 @@ const state: QueueState =
 globalThis.__tierlistrr_imgq__ = state;
 
 async function processOne(job: Job) {
-  const url = buildPollinationsUrl(job.name, job.topic);
+  // Topic-aware prompt: "chèvre" in a "Fromages" list → goat cheese, not a goat.
+  const prompt = await imagePromptFor(job.name, job.topic);
+  const url = pollinationsUrlForPrompt(prompt, `${job.topic}:${job.name}`);
   const localPath = await downloadImage(url);
   await db
     .update(items)

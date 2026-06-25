@@ -26,10 +26,10 @@ export function seedFrom(input: string): number {
   return Math.abs(h) % 1_000_000;
 }
 
-/** Build a free Pollinations image URL for an item (no API key required). */
-export function buildPollinationsUrl(
-  name: string,
-  topic: string,
+/** Build a Pollinations image URL from a full prompt (no API key required). */
+export function pollinationsUrlForPrompt(
+  prompt: string,
+  seedKey: string,
   opts: { size?: number; model?: string } = {},
 ): string {
   const size = opts.size ?? 512;
@@ -37,8 +37,7 @@ export function buildPollinationsUrl(
   const base = (
     process.env.POLLINATIONS_BASE_URL || "https://image.pollinations.ai"
   ).replace(/\/$/, "");
-  const prompt = `${name}, ${topic}, professional product photo, centered subject, studio lighting, clean background, high detail`;
-  const seed = seedFrom(`${topic}:${name}`);
+  const seed = seedFrom(seedKey);
   const params = new URLSearchParams({
     width: String(size),
     height: String(size),
@@ -47,6 +46,20 @@ export function buildPollinationsUrl(
     nologo: "true",
   });
   return `${base}/prompt/${encodeURIComponent(prompt)}?${params}`;
+}
+
+/** Mechanical fallback prompt (no LLM): the name framed by the list's topic. */
+function mechanicalPrompt(name: string, topic: string): string {
+  return `${name}, ${topic}, professional product photo, centered subject, studio lighting, clean background, high detail`;
+}
+
+/** Build a free Pollinations image URL for an item (sync, mechanical prompt). */
+export function buildPollinationsUrl(
+  name: string,
+  topic: string,
+  opts: { size?: number; model?: string } = {},
+): string {
+  return pollinationsUrlForPrompt(mechanicalPrompt(name, topic), `${topic}:${name}`, opts);
 }
 
 /**
@@ -97,11 +110,13 @@ export function parseItemNames(raw: string, max: number): string[] {
   return names;
 }
 
-/** Ask the LLM for `count` item names on a topic. Throws on misconfig/failure. */
-export async function generateItemNames(
-  topic: string,
-  count: number,
-): Promise<string[]> {
+type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
+
+/** Minimal OpenAI-compatible chat call (Groq by default). Returns the content. */
+async function groqChat(
+  messages: ChatMessage[],
+  opts: { json?: boolean; temperature?: number } = {},
+): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new Error(
@@ -123,22 +138,11 @@ export async function generateItemNames(
       signal: controller.signal,
       body: JSON.stringify({
         model,
-        temperature: 0.8,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "Tu génères des éléments pour des tier lists. Tu réponds uniquement en JSON valide, sans commentaire.",
-          },
-          {
-            role: "user",
-            content: `Donne exactement ${count} éléments concrets, connus et variés pour une tier list sur le thème : "${topic}". Réponds en JSON strict de la forme {"items": ["nom1", "nom2"]}. Noms courts, pas de numéros, pas de doublons.`,
-          },
-        ],
+        temperature: opts.temperature ?? 0.8,
+        ...(opts.json ? { response_format: { type: "json_object" } } : {}),
+        messages,
       }),
     });
-
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       throw new Error(
@@ -148,13 +152,64 @@ export async function generateItemNames(
     const json = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
     };
-    const content = json.choices?.[0]?.message?.content ?? "";
-    const names = parseItemNames(content, count);
-    if (names.length === 0) {
-      throw new Error("L'IA n'a renvoyé aucun élément exploitable.");
-    }
-    return names;
+    return json.choices?.[0]?.message?.content ?? "";
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+/** Ask the LLM for `count` item names on a topic. Throws on misconfig/failure. */
+export async function generateItemNames(
+  topic: string,
+  count: number,
+): Promise<string[]> {
+  const content = await groqChat(
+    [
+      {
+        role: "system",
+        content:
+          "Tu génères des éléments pour des tier lists. Tu réponds uniquement en JSON valide, sans commentaire.",
+      },
+      {
+        role: "user",
+        content: `Donne exactement ${count} éléments concrets, connus et variés pour une tier list sur le thème : "${topic}". Réponds en JSON strict de la forme {"items": ["nom1", "nom2"]}. Noms courts, pas de numéros, pas de doublons.`,
+      },
+    ],
+    { json: true },
+  );
+  const names = parseItemNames(content, count);
+  if (names.length === 0) {
+    throw new Error("L'IA n'a renvoyé aucun élément exploitable.");
+  }
+  return names;
+}
+
+/**
+ * Build an image prompt for an item that respects the list's topic — e.g.
+ * "chèvre" in a "Fromages" list must be goat *cheese*, not the animal.
+ * Uses the LLM when configured, otherwise falls back to a mechanical prompt.
+ */
+export async function imagePromptFor(name: string, topic: string): Promise<string> {
+  const fallback = mechanicalPrompt(name, topic);
+  if (!isAiConfigured()) return fallback;
+  try {
+    const content = await groqChat(
+      [
+        {
+          role: "system",
+          content:
+            "You write short English prompts for an image generator. Reply with the prompt only, a single line, no quotes.",
+        },
+        {
+          role: "user",
+          content: `Tier list topic: "${topic}". Item: "${name}". Write an image prompt depicting THIS item as a member of the topic's category — e.g. if the topic is "Fromages" and the item is "chèvre", it is goat CHEESE (not the animal); "buche de chèvre" is a goat cheese log. Style: close-up product photo, clean neutral background, studio lighting, appetizing, high detail. One single line.`,
+        },
+      ],
+      { temperature: 0.5 },
+    );
+    const line = content.trim().split("\n")[0].replace(/^["']|["']$/g, "").slice(0, 300);
+    return line || fallback;
+  } catch {
+    return fallback;
   }
 }

@@ -1,4 +1,6 @@
+import { headers } from "next/headers";
 import { getAllTierlists } from "@/lib/data";
+import { auth } from "@/lib/auth";
 import { SiteHeader } from "@/components/SiteHeader";
 import { CreateTierlistButton } from "@/components/CreateTierlistButton";
 import { TierlistCard } from "@/components/TierlistCard";
@@ -6,7 +8,11 @@ import { TierlistCard } from "@/components/TierlistCard";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const lists = await getAllTierlists();
+  const [lists, session] = await Promise.all([
+    getAllTierlists(),
+    auth.api.getSession({ headers: await headers() }),
+  ]);
+  const currentUserId = session?.user?.id ?? null;
 
   return (
     <>
@@ -50,7 +56,7 @@ export default async function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {lists.map((list) => (
-              <TierlistCard key={list.id} list={list} />
+              <TierlistCard key={list.id} list={list} currentUserId={currentUserId} />
             ))}
           </div>
         )}

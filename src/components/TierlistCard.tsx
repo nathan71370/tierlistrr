@@ -8,25 +8,34 @@ import type { TierlistSummary } from "@/lib/data";
 
 const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" });
 
-export function TierlistCard({ list }: { list: TierlistSummary }) {
+export function TierlistCard({
+  list,
+  currentUserId,
+}: {
+  list: TierlistSummary;
+  currentUserId: string | null;
+}) {
   const [pending, start] = useTransition();
+  const isOwner = Boolean(currentUserId && list.ownerId === currentUserId);
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-line bg-surface shadow-[var(--shadow-card)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-pop)]">
-      <button
-        onClick={() => {
-          if (confirm(`Supprimer « ${list.title} » ? Cette action est définitive.`)) {
-            start(() => {
-              deleteTierlist(list.id);
-            });
-          }
-        }}
-        disabled={pending}
-        aria-label="Supprimer"
-        className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-surface/90 text-muted opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-terracotta hover:text-white"
-      >
-        <Trash2 size={15} />
-      </button>
+      {isOwner ? (
+        <button
+          onClick={() => {
+            if (confirm(`Supprimer « ${list.title} » ? Cette action est définitive.`)) {
+              start(() => {
+                deleteTierlist(list.id);
+              });
+            }
+          }}
+          disabled={pending}
+          aria-label="Supprimer"
+          className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-surface/90 text-muted opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-terracotta hover:text-white"
+        >
+          <Trash2 size={15} />
+        </button>
+      ) : null}
 
       <Link href={`/t/${list.slug}`} className="flex flex-1 flex-col">
         <div className="flex h-28 items-center gap-2 overflow-hidden bg-cream-deep px-4">
