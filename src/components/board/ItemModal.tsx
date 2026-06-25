@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2 } from "lucide-react";
-import { renameItem, deleteItem } from "@/lib/actions";
+import { Trash2, Sparkles } from "lucide-react";
+import { renameItem, deleteItem, generateItemImage } from "@/lib/actions";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Label, Input } from "@/components/ui/Field";
@@ -11,17 +11,27 @@ import type { Item } from "@/db/schema";
 
 export function ItemModal({
   item,
+  aiEnabled,
   open,
   onClose,
   onSaved,
 }: {
   item: Item;
+  aiEnabled: boolean;
   open: boolean;
   onClose: () => void;
   onSaved: () => void;
 }) {
   const [name, setName] = useState(item.name);
   const [pending, start] = useTransition();
+
+  function regenerate() {
+    start(async () => {
+      await generateItemImage(item.id);
+      onSaved();
+      onClose();
+    });
+  }
 
   function save() {
     start(async () => {
@@ -53,6 +63,17 @@ export function ItemModal({
               autoFocus
               onChange={(e) => setName(e.target.value)}
             />
+            {aiEnabled ? (
+              <button
+                type="button"
+                onClick={regenerate}
+                disabled={pending}
+                className="kicker mt-2 inline-flex items-center gap-1.5 text-terracotta hover:text-terracotta-dark disabled:opacity-50"
+              >
+                <Sparkles size={12} />
+                {item.imageStatus === "pending" ? "Génération…" : "Générer / régénérer l'image"}
+              </button>
+            ) : null}
           </div>
         </div>
         <div className="flex items-center justify-between">

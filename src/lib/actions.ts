@@ -1,45 +1,24 @@
 "use server";
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { db, UPLOADS_DIR } from "@/db";
+import { db } from "@/db";
 import { tierlists, tiers, items } from "@/db/schema";
 import { slugify } from "@/lib/slug";
 import { DEFAULT_TIERS } from "@/lib/constants";
-import { generateItemNames, buildPollinationsUrl } from "@/lib/ai";
+import { generateItemNames } from "@/lib/ai";
+import { saveImageFile, removeImage } from "@/lib/images";
+import { enqueueImage } from "@/lib/imageQueue";
 
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-const MIME_EXT: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/jpg": "jpg",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/avif": "avif",
-};
-
-async function saveImage(file: File | null): Promise<string | null> {
-  if (!file || file.size === 0) return null;
-  const ext = MIME_EXT[file.type];
-  if (!ext) throw new Error("Format d'image non supporté.");
-  if (file.size > MAX_IMAGE_BYTES) throw new Error("Image trop volumineuse (max 8 Mo).");
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = `${nanoid()}.${ext}`;
-  await fs.mkdir(UPLOADS_DIR, { recursive: true });
-  await fs.writeFile(path.join(UPLOADS_DIR, filename), buffer);
-  return `/api/uploads/${filename}`;
-}
-
-async function removeImage(imagePath: string | null) {
-  // Only locally-stored uploads have a file to remove; AI images are external.
-  if (!imagePath || !imagePath.startsWith("/api/uploads/")) return;
-  const filename = imagePath.split("/").pop();
-  if (!filename) return;
-  await fs.rm(path.join(UPLOADS_DIR, filename), { force: true }).catch(() => {});
+async function tierlistTitle(id: string): Promise<string> {
+  const r = await db
+    .select({ title: tierlists.title })
+    .from(tierlists)
+    .where(eq(tierlists.id, id))
+    .limit(1);
+  return r[0]?.title ?? "";
 }
 
 async function touch(tierlistId: string) {
@@ -122,8 +101,11 @@ export async function addItem(formData: FormData) {
   if (!tierlistId) throw new Error("Tier list introuvable.");
   if (!name) throw new Error("Le nom de l'élément est obligatoire.");
 
+  const wantsAiImage = String(formData.get("generateImage") ?? "") === "1";
   const file = formData.get("image");
-  const imagePath = await saveImage(file instanceof File ? file : null);
+  const imagePath = wantsAiImage
+    ? null
+    : await saveImageFile(file instanceof File ? file : null);
 
   // New items go to the bottom of the unranked pool (tierId = null).
   const pool = await db
@@ -132,82 +114,42 @@ export async function addItem(formData: FormData) {
     .where(eq(items.tierlistId, tierlistId));
   const nextPos = pool.reduce((max, r) => Math.max(max, r.position), -1) + 1;
 
+  const id = nanoid();
   await db.insert(items).values({
-    id: nanoid(),
+    id,
     tierlistId,
     tierId: null,
     name,
     imagePath,
+    imageStatus: wantsAiImage ? "pending" : "ready",
     position: nextPos,
     createdAt: new Date(),
   });
   await touch(tierlistId);
-}
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-// Run an async mapper over items with a bounded number of workers.
-async function mapPool<T, R>(
-  list: T[],
-  concurrency: number,
-  fn: (item: T, index: number) => Promise<R>,
-): Promise<R[]> {
-  const results = new Array<R>(list.length);
-  let cursor = 0;
-  const worker = async () => {
-    while (cursor < list.length) {
-      const i = cursor++;
-      results[i] = await fn(list[i], i);
-    }
-  };
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, list.length) }, worker),
-  );
-  return results;
-}
-
-// Download a generated image to disk, with retry/backoff on rate limits.
-// Returns the local /api/uploads path, or null if it ultimately fails.
-async function downloadImage(url: string): Promise<string | null> {
-  for (let attempt = 0; attempt < 4; attempt++) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30_000);
-      let res: Response;
-      try {
-        res = await fetch(url, { signal: controller.signal });
-      } finally {
-        clearTimeout(timeout);
-      }
-      if (res.status === 429 || res.status >= 500) {
-        await sleep(1500 * (attempt + 1));
-        continue;
-      }
-      if (!res.ok) return null;
-      const type = (res.headers.get("content-type") ?? "image/jpeg")
-        .split(";")[0]
-        .trim();
-      const ext = MIME_EXT[type] ?? "jpg";
-      const buffer = Buffer.from(await res.arrayBuffer());
-      if (buffer.byteLength === 0) {
-        await sleep(1200 * (attempt + 1));
-        continue;
-      }
-      const filename = `${nanoid()}.${ext}`;
-      await fs.mkdir(UPLOADS_DIR, { recursive: true });
-      await fs.writeFile(path.join(UPLOADS_DIR, filename), buffer);
-      return `/api/uploads/${filename}`;
-    } catch {
-      await sleep(1200 * (attempt + 1));
-    }
+  if (wantsAiImage) {
+    enqueueImage({ itemId: id, name, topic: await tierlistTitle(tierlistId) });
   }
-  return null;
 }
 
-// AI pre-fill: generate item names (Groq) + images (Pollinations). Images are
-// fetched server-side with bounded concurrency and cached to disk, so the
-// browser never bursts requests at Pollinations (avoids 429). If a download
-// fails, we fall back to the hotlinked Pollinations URL for that item.
+// Re-generate (or generate) the AI image for a single existing item.
+export async function generateItemImage(itemId: string) {
+  const row = await db
+    .select({ name: items.name, topic: tierlists.title })
+    .from(items)
+    .innerJoin(tierlists, eq(items.tierlistId, tierlists.id))
+    .where(eq(items.id, itemId))
+    .limit(1);
+  if (!row[0]) throw new Error("Élément introuvable.");
+  await db
+    .update(items)
+    .set({ imageStatus: "pending" })
+    .where(eq(items.id, itemId));
+  enqueueImage({ itemId, name: row[0].name, topic: row[0].topic });
+}
+
+// AI pre-fill: generate item names (Groq), insert them immediately so they can
+// be ranked right away, and enqueue their images for background generation.
 export async function generateItems(
   tierlistId: string,
   topic: string,
@@ -220,10 +162,6 @@ export async function generateItems(
 
   const names = await generateItemNames(cleanTopic, n);
 
-  // Low concurrency + retry keeps us well under Pollinations' rate limits.
-  const urls = names.map((name) => buildPollinationsUrl(name, cleanTopic));
-  const localPaths = await mapPool(urls, 2, (url) => downloadImage(url));
-
   const pool = await db
     .select({ position: items.position })
     .from(items)
@@ -231,19 +169,23 @@ export async function generateItems(
   let nextPos = pool.reduce((max, r) => Math.max(max, r.position), -1) + 1;
 
   const now = new Date();
-  await db.insert(items).values(
-    names.map((name, i) => ({
-      id: nanoid(),
-      tierlistId,
-      tierId: null,
-      name,
-      imagePath: localPaths[i] ?? urls[i],
-      position: nextPos++,
-      createdAt: now,
-    })),
-  );
+  const rows = names.map((name) => ({
+    id: nanoid(),
+    tierlistId,
+    tierId: null,
+    name,
+    imagePath: null,
+    imageStatus: "pending",
+    position: nextPos++,
+    createdAt: now,
+  }));
+  await db.insert(items).values(rows);
   await touch(tierlistId);
-  return { created: names.length };
+
+  for (const r of rows) {
+    enqueueImage({ itemId: r.id, name: r.name, topic: cleanTopic });
+  }
+  return { created: rows.length };
 }
 
 export async function renameItem(id: string, name: string) {

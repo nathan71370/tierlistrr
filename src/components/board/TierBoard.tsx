@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -66,6 +66,20 @@ export function TierBoard({
 
   const refresh = () => router.refresh();
 
+  // While any AI image is still generating, poll so they pop in as they finish.
+  const pendingImages = useMemo(
+    () =>
+      Object.values(groups)
+        .flat()
+        .filter((it) => it.imageStatus === "pending").length,
+    [groups],
+  );
+  useEffect(() => {
+    if (pendingImages === 0) return;
+    const id = setInterval(() => router.refresh(), 3000);
+    return () => clearInterval(id);
+  }, [pendingImages, router]);
+
   function onDragEnd(result: DropResult) {
     const { source, destination } = result;
     if (!destination) return;
@@ -122,22 +136,29 @@ export function TierBoard({
             ) : null}
           </div>
           <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "kicker inline-flex items-center gap-1.5 transition-opacity",
-                saving ? "opacity-100" : "opacity-0",
-              )}
-            >
-              {saving ? (
-                <>
-                  <Loader2 size={12} className="animate-spin" /> Enregistrement
-                </>
-              ) : (
-                <>
-                  <Check size={12} /> Enregistré
-                </>
-              )}
-            </span>
+            {pendingImages > 0 ? (
+              <span className="kicker inline-flex items-center gap-1.5 text-terracotta">
+                <Loader2 size={12} className="animate-spin" />
+                {pendingImages} image{pendingImages > 1 ? "s" : ""}
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  "kicker inline-flex items-center gap-1.5 transition-opacity",
+                  saving ? "opacity-100" : "opacity-0",
+                )}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" /> Enregistrement
+                  </>
+                ) : (
+                  <>
+                    <Check size={12} /> Enregistré
+                  </>
+                )}
+              </span>
+            )}
             <Button variant="secondary" onClick={() => setSettingsOpen(true)}>
               <Settings2 size={15} />
               Réglages
@@ -257,6 +278,7 @@ export function TierBoard({
       {/* Modals */}
       <AddItemModal
         tierlistId={tierlist.id}
+        aiEnabled={aiEnabled}
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onSaved={refresh}
@@ -287,6 +309,7 @@ export function TierBoard({
       {editItem ? (
         <ItemModal
           item={editItem}
+          aiEnabled={aiEnabled}
           open
           onClose={() => setEditItem(null)}
           onSaved={refresh}

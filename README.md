@@ -48,6 +48,8 @@ Variables d'environnement :
 | `GROQ_MODEL`    | Modèle LLM utilisé                                            | `llama-3.3-70b-versatile` |
 | `GROQ_BASE_URL` | Endpoint compatible OpenAI (pour pointer ailleurs que Groq)  | `https://api.groq.com/openai/v1` |
 | `POLLINATIONS_BASE_URL` | Base du service d'images (pour self-host/proxy)     | `https://image.pollinations.ai` |
+| `POLLINATIONS_TOKEN` | Token gratuit (auth.pollinations.ai) : limites plus hautes, pas de file | — |
+| `IMAGE_CONCURRENCY` | Nb d'images générées en parallèle en arrière-plan       | `2` |
 
 Pour persister les données, montez un volume sur `DATA_DIR` (la base + le dossier
 `uploads/` y vivent). C'est tout ce qu'il faut sauvegarder.
@@ -58,9 +60,11 @@ Sans `GROQ_API_KEY`, l'app fonctionne normalement et le bouton « Générer » e
 simplement masqué. Avec une clé (gratuite sur [console.groq.com](https://console.groq.com)),
 le board affiche **Générer** : l'IA propose des éléments pour le thème de la liste
 et leur associe une image générée par [Pollinations](https://pollinations.ai)
-(aucune clé requise). Les images sont **téléchargées côté serveur** (concurrence
-limitée + retries pour éviter les 429) et **stockées sur disque** comme les
-uploads manuels.
+(aucune clé requise). Les éléments arrivent **immédiatement** (classables tout de
+suite) ; les images se génèrent **en arrière-plan** (worker in-process, concurrence
+limitée + retries), sont **téléchargées et stockées sur disque**, et apparaissent
+au fur et à mesure. Un `POLLINATIONS_TOKEN` (gratuit) accélère et fiabilise tout
+ça. Idem à l'ajout manuel d'un élément : option « Générer l'image (IA) ».
 
 ## Déploiement Docker / Komodo
 

@@ -29,6 +29,8 @@ export const items = sqliteTable("items", {
   tierId: text("tier_id").references(() => tiers.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   imagePath: text("image_path"),
+  // 'ready' | 'pending' | 'failed' — drives async AI image generation.
+  imageStatus: text("image_status").notNull().default("ready"),
   position: integer("position").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });

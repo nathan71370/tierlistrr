@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS items (
   tier_id TEXT REFERENCES tiers(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   image_path TEXT,
+  image_status TEXT NOT NULL DEFAULT 'ready',
   position INTEGER NOT NULL,
   created_at INTEGER NOT NULL
 );
@@ -57,12 +58,25 @@ declare global {
     | undefined;
 }
 
+// Additive, idempotent migrations for databases created before a column existed.
+// Each runs on its own; "duplicate column" errors are expected and ignored.
+const MIGRATIONS = [
+  "ALTER TABLE items ADD COLUMN image_status TEXT NOT NULL DEFAULT 'ready'",
+];
+
 function init() {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
   const client = createClient({ url: buildDbUrl() });
-  client.executeMultiple(SCHEMA_SQL).catch((e) => {
-    console.error("Failed to initialise database schema:", e);
-  });
+  client
+    .executeMultiple(SCHEMA_SQL)
+    .then(async () => {
+      for (const sql of MIGRATIONS) {
+        await client.execute(sql).catch(() => {});
+      }
+    })
+    .catch((e) => {
+      console.error("Failed to initialise database schema:", e);
+    });
   const db = drizzle(client, { schema });
   return { client, db };
 }
