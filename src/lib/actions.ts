@@ -10,6 +10,7 @@ import { db, UPLOADS_DIR } from "@/db";
 import { tierlists, tiers, items } from "@/db/schema";
 import { slugify } from "@/lib/slug";
 import { DEFAULT_TIERS } from "@/lib/constants";
+import { generateItemNames, buildPollinationsUrl } from "@/lib/ai";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MIME_EXT: Record<string, string> = {
@@ -34,7 +35,8 @@ async function saveImage(file: File | null): Promise<string | null> {
 }
 
 async function removeImage(imagePath: string | null) {
-  if (!imagePath) return;
+  // Only locally-stored uploads have a file to remove; AI images are external.
+  if (!imagePath || !imagePath.startsWith("/api/uploads/")) return;
   const filename = imagePath.split("/").pop();
   if (!filename) return;
   await fs.rm(path.join(UPLOADS_DIR, filename), { force: true }).catch(() => {});
@@ -140,6 +142,42 @@ export async function addItem(formData: FormData) {
     createdAt: new Date(),
   });
   await touch(tierlistId);
+}
+
+// AI pre-fill: generate item names (Groq) + key-less images (Pollinations),
+// dropping the new items into the unranked pool.
+export async function generateItems(
+  tierlistId: string,
+  topic: string,
+  count: number,
+): Promise<{ created: number }> {
+  if (!tierlistId) throw new Error("Tier list introuvable.");
+  const cleanTopic = topic.trim();
+  if (!cleanTopic) throw new Error("Donne un thème pour la génération.");
+  const n = Math.max(1, Math.min(24, Math.round(count) || 12));
+
+  const names = await generateItemNames(cleanTopic, n);
+
+  const pool = await db
+    .select({ position: items.position })
+    .from(items)
+    .where(eq(items.tierlistId, tierlistId));
+  let nextPos = pool.reduce((max, r) => Math.max(max, r.position), -1) + 1;
+
+  const now = new Date();
+  await db.insert(items).values(
+    names.map((name) => ({
+      id: nanoid(),
+      tierlistId,
+      tierId: null,
+      name,
+      imagePath: buildPollinationsUrl(name, cleanTopic),
+      position: nextPos++,
+      createdAt: now,
+    })),
+  );
+  await touch(tierlistId);
+  return { created: names.length };
 }
 
 export async function renameItem(id: string, name: string) {

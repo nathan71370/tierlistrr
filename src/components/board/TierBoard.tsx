@@ -9,13 +9,14 @@ import {
   Droppable,
   type DropResult,
 } from "@hello-pangea/dnd";
-import { ArrowLeft, Plus, Settings2, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Settings2, Check, Loader2, Sparkles } from "lucide-react";
 import { saveLayout, addTier } from "@/lib/actions";
 import { groupItems, toPlacements, type Groups } from "@/lib/board";
 import { POOL_ID } from "@/lib/constants";
 import { Button } from "@/components/ui/Button";
 import { ItemThumb } from "./ItemTile";
 import { AddItemModal } from "./AddItemModal";
+import { GenerateItemsModal } from "./GenerateItemsModal";
 import { EditTierModal } from "./EditTierModal";
 import { ItemModal } from "./ItemModal";
 import { EditTierlistModal } from "./EditTierlistModal";
@@ -26,10 +27,12 @@ export function TierBoard({
   tierlist,
   initialTiers,
   initialItems,
+  aiEnabled,
 }: {
   tierlist: Tierlist;
   initialTiers: Tier[];
   initialItems: Item[];
+  aiEnabled: boolean;
 }) {
   const router = useRouter();
   const [tiers, setTiers] = useState<Tier[]>(initialTiers);
@@ -39,6 +42,7 @@ export function TierBoard({
   const [saving, startSaving] = useTransition();
 
   const [addOpen, setAddOpen] = useState(false);
+  const [genOpen, setGenOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const [editItem, setEditItem] = useState<Item | null>(null);
@@ -138,6 +142,12 @@ export function TierBoard({
               <Settings2 size={15} />
               Réglages
             </Button>
+            {aiEnabled ? (
+              <Button variant="secondary" onClick={() => setGenOpen(true)}>
+                <Sparkles size={15} />
+                Générer
+              </Button>
+            ) : null}
             <Button onClick={() => setAddOpen(true)}>
               <Plus size={16} />
               Ajouter
@@ -251,6 +261,15 @@ export function TierBoard({
         onClose={() => setAddOpen(false)}
         onSaved={refresh}
       />
+      {aiEnabled ? (
+        <GenerateItemsModal
+          tierlistId={tierlist.id}
+          defaultTopic={tierlist.title}
+          open={genOpen}
+          onClose={() => setGenOpen(false)}
+          onSaved={refresh}
+        />
+      ) : null}
       <EditTierlistModal
         tierlist={tierlist}
         open={settingsOpen}

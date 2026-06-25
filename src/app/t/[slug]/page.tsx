@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTierlistBySlug } from "@/lib/data";
+import { isAiConfigured } from "@/lib/ai";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TierBoard } from "@/components/board/TierBoard";
 
@@ -21,6 +22,7 @@ export default async function TierlistPage({
         tierlist={board.tierlist}
         initialTiers={board.tiers}
         initialItems={board.items}
+        aiEnabled={isAiConfigured()}
       />
     </>
   );

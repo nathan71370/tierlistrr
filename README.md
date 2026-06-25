@@ -15,6 +15,8 @@ une, on la visualise ou on la modifie.
 - **Drizzle ORM** sur **libSQL/SQLite** (`@libsql/client`, fichier local)
 - **@hello-pangea/dnd** pour le glisser-déposer
 - Server Actions pour toutes les mutations, images stockées sur disque
+- **IA** : génération d'éléments via **Groq** (API compatible OpenAI) + images
+  via **Pollinations** (sans clé)
 
 ## Démarrer en développement
 
@@ -42,9 +44,21 @@ Variables d'environnement :
 | `DATA_DIR`      | Dossier de la base SQLite **et** des images uploadées        | `./data`             |
 | `DATABASE_URL`  | URL libSQL explicite (ex. `file:/var/lib/tierlistrr/app.db`) | dérivé de `DATA_DIR` |
 | `PORT`          | Port HTTP                                                     | `3000`               |
+| `GROQ_API_KEY`  | Active la génération IA d'éléments (clé Groq gratuite)        | — (IA désactivée)    |
+| `GROQ_MODEL`    | Modèle LLM utilisé                                            | `llama-3.3-70b-versatile` |
+| `GROQ_BASE_URL` | Endpoint compatible OpenAI (pour pointer ailleurs que Groq)  | `https://api.groq.com/openai/v1` |
 
 Pour persister les données, montez un volume sur `DATA_DIR` (la base + le dossier
 `uploads/` y vivent). C'est tout ce qu'il faut sauvegarder.
+
+### IA (optionnel)
+
+Sans `GROQ_API_KEY`, l'app fonctionne normalement et le bouton « Générer » est
+simplement masqué. Avec une clé (gratuite sur [console.groq.com](https://console.groq.com)),
+le board affiche **Générer** : l'IA propose des éléments pour le thème de la liste
+et leur associe une image générée par [Pollinations](https://pollinations.ai)
+(aucune clé requise). Les images IA sont liées depuis Pollinations (hotlink) ;
+les uploads manuels, eux, restent stockés sur disque.
 
 ## Modèle de données
 
@@ -72,11 +86,10 @@ en une passe.
 ## Feuille de route
 
 - [x] **Base** — création / visualisation / édition de tier lists, drag & drop, photos
-- [ ] **IA (phase 2)** — pré-remplissage d'une tier list nouvellement créée :
-  - **Groq** (LLM gratuit) pour générer la liste d'éléments (ex. « cocktails » →
-    Moscow Mule, Caïpirinha, Negroni…)
-  - **Pollinations.ai** (images génératives gratuites, sans clé) pour les visuels
+- [x] **IA** — bouton « Générer » : Groq propose les éléments du thème, Pollinations
+  génère les images, le tout atterrit dans « à classer »
 - [ ] Réordonnancement des tiers par glisser-déposer
+- [ ] Cache disque des images IA (au lieu du hotlink Pollinations)
 - [ ] Export image de la tier list
 
 ## Licence
