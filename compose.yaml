@@ -1,11 +1,8 @@
 # Komodo / Docker Compose stack for tierlistrr.
 #
-# In Komodo: create a Stack pointing at this repo (compose file: compose.yaml).
-# Set secrets/options in the Stack's Environment, e.g.:
+# Env vars (Komodo Environment tab):
 #   GROQ_API_KEY=gsk_xxx
-#   TIERLISTRR_PORT=3000
-# Komodo writes those to a .env file that Compose interpolates below.
-
+#   GROQ_MODEL=llama-3.3-70b-versatile   (optionnel)
 services:
   tierlistrr:
     container_name: tierlistrr
@@ -14,17 +11,25 @@ services:
       dockerfile: Dockerfile
     image: tierlistrr:latest
     restart: unless-stopped
-    ports:
-      - "${TIERLISTRR_PORT:-3000}:3000"
     environment:
       DATA_DIR: /data
-      # AI (optional) — leave GROQ_API_KEY empty to disable the "Générer" button.
       GROQ_API_KEY: "${GROQ_API_KEY:-}"
       GROQ_MODEL: "${GROQ_MODEL:-llama-3.3-70b-versatile}"
       GROQ_BASE_URL: "${GROQ_BASE_URL:-https://api.groq.com/openai/v1}"
     volumes:
-      # Persists the SQLite database AND uploaded images.
       - tierlistrr-data:/data
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tierlistrr.rule=Host(`tierlistrr.example.com`)"
+      - "traefik.http.routers.tierlistrr.entrypoints=websecure"
+      - "traefik.http.routers.adguard.tls=true"
+      - "traefik.http.services.tierlistrr.loadbalancer.server.port=3000"
 
 volumes:
   tierlistrr-data:
+
+networks:
+  traefik:
+    external: true
