@@ -9,16 +9,30 @@ export type Placement = {
   position: number;
 };
 
-/** Group items by tier id, with unranked items under POOL_ID, each sorted by position. */
-export function groupItems(items: Item[], tierIds: string[]): Groups {
+export type PlacementMap = Record<string, { tierId: string | null; position: number }>;
+
+/**
+ * Group shared items into tiers according to a specific participant's
+ * placements. Items without a placement fall into the pool, ordered by their
+ * default item position.
+ */
+export function groupByPlacement(
+  items: Item[],
+  tierIds: string[],
+  placements: PlacementMap,
+): Groups {
   const groups: Groups = { [POOL_ID]: [] };
   for (const id of tierIds) groups[id] = [];
+
+  const order = new Map<string, number>();
   for (const item of items) {
-    const key = item.tierId && groups[item.tierId] ? item.tierId : POOL_ID;
+    const pl = placements[item.id];
+    const key = pl?.tierId && groups[pl.tierId] ? pl.tierId : POOL_ID;
+    order.set(item.id, pl ? pl.position : item.position);
     groups[key].push(item);
   }
   for (const key of Object.keys(groups)) {
-    groups[key].sort((a, b) => a.position - b.position);
+    groups[key].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
   }
   return groups;
 }

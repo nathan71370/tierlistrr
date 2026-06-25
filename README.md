@@ -97,13 +97,19 @@ GROQ_API_KEY=gsk_xxx docker compose up -d --build
 
 ## Modèle de données
 
-- **tierlists** — `id`, `slug`, `title`, `description`, timestamps
-- **tiers** — `id`, `tierlistId`, `label`, `color`, `position`
-- **items** — `id`, `tierlistId`, `tierId` *(null = pool « à classer »)*, `name`,
-  `imagePath`, `position`
+- **user / session / account / verification** — comptes (better-auth, OTP email)
+- **tierlists** — `id`, `slug`, `title`, `description`, `ownerId`, timestamps
+  *(toujours publiques)*
+- **tiers** — `id`, `tierlistId`, `label`, `color`, `position` *(définition partagée)*
+- **items** — `id`, `tierlistId`, `name`, `imagePath`, `imageStatus`, `position`
+  *(éléments partagés)*
+- **placements** — `id`, `tierlistId`, `userId`, `itemId`, `tierId` *(null = pool)*,
+  `position` — le **classement par participant** (une ligne par utilisateur × élément)
 
-Chaque liste démarre avec 5 tiers (S, A, B, C, D) renommables/recolorables, et un
-pool « à classer » qui reçoit les nouveaux éléments.
+Une liste est un **sujet partagé** : le **créateur** gère les éléments et les tiers
+(5 par défaut : S, A, B, C, D) ; chaque **participant connecté** a son **propre
+classement**. **Sans compte = lecture seule** (on peut voir le classement de chaque
+participant via le sélecteur, et partager le lien).
 
 ## Design system « marathon »
 
@@ -125,7 +131,11 @@ en une passe.
   génère les images, le tout atterrit dans « à classer »
 - [x] **Images IA sur disque** — téléchargées et persistées (concurrence limitée
   + retries), plus de hotlink ni de 429 à l'affichage
+- [x] **Comptes + multi-utilisateurs** — connexion OTP email, listes publiques,
+  classement par participant, sélecteur de participant, partage par lien,
+  lecture seule sans compte
 - [ ] Réordonnancement des tiers par glisser-déposer
+- [ ] Vue consensus (classement agrégé des participants)
 - [ ] Export image de la tier list
 
 ## Licence

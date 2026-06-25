@@ -4,9 +4,9 @@ import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { tierlists, tiers, items } from "@/db/schema";
+import { tierlists, tiers, items, placements } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { DEFAULT_TIERS } from "@/lib/constants";
@@ -19,6 +19,46 @@ async function requireUser() {
   if (!session?.user) throw new Error("Connecte-toi pour faire ça.");
   return session.user;
 }
+
+// Owner-only guard: management of items and tiers belongs to the list's creator.
+async function requireOwnerByTierlist(tierlistId: string) {
+  const u = await requireUser();
+  const r = await db
+    .select({ ownerId: tierlists.ownerId })
+    .from(tierlists)
+    .where(eq(tierlists.id, tierlistId))
+    .limit(1);
+  if (!r[0]) throw new Error("Tier list introuvable.");
+  if (!r[0].ownerId || r[0].ownerId !== u.id) {
+    throw new Error("Seul le créateur peut modifier cette liste.");
+  }
+  return u;
+}
+
+async function tierlistIdOfItem(itemId: string): Promise<string> {
+  const r = await db
+    .select({ tierlistId: items.tierlistId })
+    .from(items)
+    .where(eq(items.id, itemId))
+    .limit(1);
+  if (!r[0]) throw new Error("Élément introuvable.");
+  return r[0].tierlistId;
+}
+
+async function tierlistIdOfTier(tierId: string): Promise<string> {
+  const r = await db
+    .select({ tierlistId: tiers.tierlistId })
+    .from(tiers)
+    .where(eq(tiers.id, tierId))
+    .limit(1);
+  if (!r[0]) throw new Error("Tier introuvable.");
+  return r[0].tierlistId;
+}
+
+const requireOwnerByItem = async (itemId: string) =>
+  requireOwnerByTierlist(await tierlistIdOfItem(itemId));
+const requireOwnerByTier = async (tierId: string) =>
+  requireOwnerByTierlist(await tierlistIdOfTier(tierId));
 
 async function tierlistTitle(id: string): Promise<string> {
   const r = await db
@@ -75,6 +115,7 @@ export async function createTierlist(formData: FormData) {
 }
 
 export async function deleteTierlist(id: string) {
+  await requireOwnerByTierlist(id);
   const own = await db
     .select({ imagePath: items.imagePath })
     .from(items)
@@ -92,6 +133,7 @@ export async function renameTierlist(
   title: string,
   description: string,
 ) {
+  await requireOwnerByTierlist(id);
   const t = title.trim();
   if (!t) throw new Error("Le titre est obligatoire.");
   await db
@@ -110,6 +152,7 @@ export async function addItem(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!tierlistId) throw new Error("Tier list introuvable.");
   if (!name) throw new Error("Le nom de l'élément est obligatoire.");
+  await requireOwnerByTierlist(tierlistId);
 
   const wantsAiImage = String(formData.get("generateImage") ?? "") === "1";
   const file = formData.get("image");
@@ -144,6 +187,7 @@ export async function addItem(formData: FormData) {
 
 // Re-generate (or generate) the AI image for a single existing item.
 export async function generateItemImage(itemId: string) {
+  await requireOwnerByItem(itemId);
   const row = await db
     .select({ name: items.name, topic: tierlists.title })
     .from(items)
@@ -166,6 +210,7 @@ export async function generateItems(
   count: number,
 ): Promise<{ created: number }> {
   if (!tierlistId) throw new Error("Tier list introuvable.");
+  await requireOwnerByTierlist(tierlistId);
   const cleanTopic = topic.trim();
   if (!cleanTopic) throw new Error("Donne un thème pour la génération.");
   const n = Math.max(1, Math.min(24, Math.round(count) || 12));
@@ -199,12 +244,14 @@ export async function generateItems(
 }
 
 export async function renameItem(id: string, name: string) {
+  await requireOwnerByItem(id);
   const n = name.trim();
   if (!n) throw new Error("Le nom est obligatoire.");
   await db.update(items).set({ name: n }).where(eq(items.id, id));
 }
 
 export async function deleteItem(id: string) {
+  await requireOwnerByItem(id);
   const row = await db
     .select({ imagePath: items.imagePath })
     .from(items)
@@ -220,13 +267,26 @@ export type Placement = {
   position: number;
 };
 
-// Persist the full board arrangement after a drag-and-drop.
-export async function saveLayout(tierlistId: string, placements: Placement[]) {
-  for (const p of placements) {
-    await db
-      .update(items)
-      .set({ tierId: p.tierId, position: p.position })
-      .where(eq(items.id, p.itemId));
+// Persist the current user's full ranking for a list (one row per item).
+// Any logged-in user may save their own placements; that makes them a participant.
+export async function savePlacements(tierlistId: string, list: Placement[]) {
+  const u = await requireUser();
+  await db
+    .delete(placements)
+    .where(
+      and(eq(placements.tierlistId, tierlistId), eq(placements.userId, u.id)),
+    );
+  if (list.length) {
+    await db.insert(placements).values(
+      list.map((p) => ({
+        id: nanoid(),
+        tierlistId,
+        userId: u.id,
+        itemId: p.itemId,
+        tierId: p.tierId,
+        position: p.position,
+      })),
+    );
   }
   await touch(tierlistId);
 }
@@ -236,6 +296,7 @@ export async function saveLayout(tierlistId: string, placements: Placement[]) {
 // ---------------------------------------------------------------------------
 
 export async function updateTier(id: string, label: string, color: string) {
+  await requireOwnerByTier(id);
   await db
     .update(tiers)
     .set({ label: label.trim() || "?", color })
@@ -243,6 +304,7 @@ export async function updateTier(id: string, label: string, color: string) {
 }
 
 export async function addTier(tierlistId: string) {
+  await requireOwnerByTierlist(tierlistId);
   const existing = await db
     .select({ position: tiers.position })
     .from(tiers)
@@ -259,12 +321,14 @@ export async function addTier(tierlistId: string) {
 }
 
 export async function deleteTier(id: string) {
-  // Send this tier's items back to the unranked pool, then drop the tier.
-  await db.update(items).set({ tierId: null }).where(eq(items.tierId, id));
+  await requireOwnerByTier(id);
+  // Everyone's items in this tier fall back to their pool, then drop the tier.
+  await db.update(placements).set({ tierId: null }).where(eq(placements.tierId, id));
   await db.delete(tiers).where(eq(tiers.id, id));
 }
 
 export async function reorderTiers(tierlistId: string, orderedIds: string[]) {
+  await requireOwnerByTierlist(tierlistId);
   for (let idx = 0; idx < orderedIds.length; idx++) {
     await db.update(tiers).set({ position: idx }).where(eq(tiers.id, orderedIds[idx]));
   }

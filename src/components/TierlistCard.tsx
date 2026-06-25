@@ -46,6 +46,7 @@ export function TierlistCard({ list }: { list: TierlistSummary }) {
         </div>
         <div className="flex flex-1 flex-col gap-2 p-5">
           <h3 className="display text-2xl text-ink">{list.title}</h3>
+          {list.ownerLabel ? <p className="kicker">par {list.ownerLabel}</p> : null}
           {list.description ? (
             <p className="line-clamp-2 text-sm leading-relaxed text-ink-soft">
               {list.description}

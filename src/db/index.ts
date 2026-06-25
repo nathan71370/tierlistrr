@@ -98,6 +98,18 @@ CREATE TABLE IF NOT EXISTS verification (
 CREATE INDEX IF NOT EXISTS idx_session_user ON session(user_id);
 CREATE INDEX IF NOT EXISTS idx_account_user ON account(user_id);
 CREATE INDEX IF NOT EXISTS idx_verification_identifier ON verification(identifier);
+
+-- per-user rankings
+CREATE TABLE IF NOT EXISTS placements (
+  id TEXT PRIMARY KEY,
+  tierlist_id TEXT NOT NULL REFERENCES tierlists(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+  item_id TEXT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  tier_id TEXT REFERENCES tiers(id) ON DELETE SET NULL,
+  position INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_placement_user_item ON placements(user_id, item_id);
+CREATE INDEX IF NOT EXISTS idx_placements_list_user ON placements(tierlist_id, user_id);
 `;
 
 declare global {

@@ -1,5 +1,6 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
+import { user } from "./auth-schema";
 
 export * from "./auth-schema";
 
@@ -66,3 +67,27 @@ export const itemsRelations = relations(items, ({ one }) => ({
 export type Tierlist = typeof tierlists.$inferSelect;
 export type Tier = typeof tiers.$inferSelect;
 export type Item = typeof items.$inferSelect;
+
+// Per-user ranking: each participant places each shared item into a tier
+// (or leaves it in the pool, tierId = null). One row per (user, item).
+export const placements = sqliteTable(
+  "placements",
+  {
+    id: text("id").primaryKey(),
+    tierlistId: text("tierlist_id")
+      .notNull()
+      .references(() => tierlists.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    itemId: text("item_id")
+      .notNull()
+      .references(() => items.id, { onDelete: "cascade" }),
+    tierId: text("tier_id").references(() => tiers.id, { onDelete: "set null" }),
+    position: integer("position").notNull(),
+  },
+  (t) => [uniqueIndex("uniq_placement_user_item").on(t.userId, t.itemId)],
+);
+
+export type Placement = typeof placements.$inferSelect;
+
