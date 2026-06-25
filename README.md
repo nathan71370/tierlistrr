@@ -60,6 +60,29 @@ et leur associe une image générée par [Pollinations](https://pollinations.ai)
 (aucune clé requise). Les images IA sont liées depuis Pollinations (hotlink) ;
 les uploads manuels, eux, restent stockés sur disque.
 
+## Déploiement Docker / Komodo
+
+Le repo fournit un `Dockerfile` (build Next.js *standalone*, image Debian slim
+non-root, healthcheck) et un `compose.yaml` prêt pour [Komodo](https://komo.do).
+
+**Komodo** — crée une **Stack** pointant sur ce repo (fichier `compose.yaml`),
+puis renseigne l'**Environment** de la Stack :
+
+```env
+TIERLISTRR_PORT=3000
+GROQ_API_KEY=gsk_xxx        # optionnel (active la génération IA)
+# GROQ_MODEL=llama-3.3-70b-versatile
+```
+
+Komodo build l'image et lance le conteneur. Le volume nommé `tierlistrr-data`
+(monté sur `/data`) persiste la base SQLite **et** les images uploadées.
+
+**Docker Compose** (manuel) :
+
+```bash
+GROQ_API_KEY=gsk_xxx docker compose up -d --build
+```
+
 ## Modèle de données
 
 - **tierlists** — `id`, `slug`, `title`, `description`, timestamps
