@@ -2,14 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Pencil } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/Button";
 import { SignInModal } from "./SignInModal";
+import { ProfileModal } from "./ProfileModal";
 
 export function HeaderAuth() {
   const { data, isPending } = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [signingOut, startSignOut] = useTransition();
 
   if (isPending) {
@@ -17,12 +20,17 @@ export function HeaderAuth() {
   }
 
   if (data?.user) {
-    const label = data.user.name?.trim() || data.user.email;
+    const label = data.user.name?.trim() || data.user.email.split("@")[0];
     return (
-      <div className="flex items-center gap-3">
-        <span className="hidden max-w-[180px] truncate text-sm text-ink-soft sm:inline">
-          {label}
-        </span>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setProfileOpen(true)}
+          title="Modifier ton nom"
+          className="group hidden max-w-[200px] items-center gap-1.5 truncate text-sm text-ink-soft hover:text-ink sm:inline-flex"
+        >
+          <span className="truncate">{label}</span>
+          <Pencil size={13} className="shrink-0 opacity-0 transition group-hover:opacity-70" />
+        </button>
         <Button
           size="sm"
           variant="secondary"
@@ -36,6 +44,12 @@ export function HeaderAuth() {
         >
           Déconnexion
         </Button>
+        <ProfileModal
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          initialName={data.user.name ?? ""}
+          email={data.user.email}
+        />
       </div>
     );
   }

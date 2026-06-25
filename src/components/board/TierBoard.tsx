@@ -19,11 +19,12 @@ import {
   Share2,
   Eye,
   LogIn,
+  Trophy,
 } from "lucide-react";
 import { savePlacements, addTier } from "@/lib/actions";
 import { groupByPlacement, toPlacements, type Groups, type PlacementMap } from "@/lib/board";
-import { POOL_ID } from "@/lib/constants";
-import { Button } from "@/components/ui/Button";
+import { POOL_ID, CONSENSUS_ID } from "@/lib/constants";
+import { Button, buttonClasses } from "@/components/ui/Button";
 import { SignInModal } from "@/components/auth/SignInModal";
 import { ItemThumb } from "./ItemTile";
 import { AddItemModal } from "./AddItemModal";
@@ -47,6 +48,8 @@ export function TierBoard({
   canEdit,
   isOwner,
   isAuthed,
+  isConsensus,
+  consensusAvailable,
   aiEnabled,
 }: {
   tierlist: Tierlist;
@@ -60,6 +63,8 @@ export function TierBoard({
   canEdit: boolean;
   isOwner: boolean;
   isAuthed: boolean;
+  isConsensus: boolean;
+  consensusAvailable: boolean;
   aiEnabled: boolean;
 }) {
   const router = useRouter();
@@ -154,8 +159,8 @@ export function TierBoard({
     <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8">
       {/* Header */}
       <div className="mb-5">
-        <Link href="/" className="kicker inline-flex items-center gap-1.5 hover:text-ink">
-          <ArrowLeft size={13} /> Toutes les listes
+        <Link href="/" className={cn(buttonClasses("secondary", "sm"))}>
+          <ArrowLeft size={15} /> Toutes les listes
         </Link>
         <div className="mt-4 flex flex-col gap-5 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
@@ -207,9 +212,22 @@ export function TierBoard({
       </div>
 
       {/* Participant selector */}
-      {participants.length > 0 ? (
+      {participants.length > 0 || consensusAvailable ? (
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <span className="kicker mr-1">Classement de</span>
+          {consensusAvailable ? (
+            <button
+              onClick={() => selectParticipant(CONSENSUS_ID)}
+              className={cn(
+                "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold transition-colors",
+                isConsensus
+                  ? "border-terracotta bg-terracotta text-white"
+                  : "border-terracotta/40 bg-surface text-terracotta hover:bg-terracotta/10",
+              )}
+            >
+              <Trophy size={13} /> Moyenne
+            </button>
+          ) : null}
           {participants.map((p) => (
             <button
               key={p.userId}
@@ -232,8 +250,17 @@ export function TierBoard({
       {canEdit ? null : isAuthed ? (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-line bg-cream-deep px-4 py-3">
           <span className="inline-flex items-center gap-2 text-sm text-ink-soft">
-            <Eye size={15} /> Tu regardes le classement de{" "}
-            <strong>{viewedLabel ?? "ce participant"}</strong> — lecture seule.
+            {isConsensus ? (
+              <>
+                <Trophy size={15} className="text-terracotta" /> Classement{" "}
+                <strong>moyen</strong> de tous les participants — lecture seule.
+              </>
+            ) : (
+              <>
+                <Eye size={15} /> Tu regardes le classement de{" "}
+                <strong>{viewedLabel ?? "ce participant"}</strong> — lecture seule.
+              </>
+            )}
           </span>
           {currentUserId ? (
             <Button size="sm" onClick={() => selectParticipant(currentUserId)}>

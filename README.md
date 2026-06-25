@@ -131,11 +131,12 @@ en une passe.
   génère les images, le tout atterrit dans « à classer »
 - [x] **Images IA sur disque** — téléchargées et persistées (concurrence limitée
   + retries), plus de hotlink ni de 429 à l'affichage
-- [x] **Comptes + multi-utilisateurs** — connexion OTP email, listes publiques,
-  classement par participant, sélecteur de participant, partage par lien,
-  lecture seule sans compte
+- [x] **Comptes + multi-utilisateurs** — connexion OTP email, nom modifiable,
+  listes publiques, classement par participant, sélecteur de participant,
+  partage par lien, lecture seule sans compte
+- [x] **Classement moyen (leaderboard)** — vue « Moyenne » qui agrège les
+  classements de tous les participants (rang moyen de chaque élément)
 - [ ] Réordonnancement des tiers par glisser-déposer
-- [ ] Vue consensus (classement agrégé des participants)
 - [ ] Export image de la tier list
 
 ## Licence

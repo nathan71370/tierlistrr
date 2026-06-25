@@ -21,3 +21,6 @@ export const TIER_COLORS = [
 ];
 
 export const POOL_ID = "__pool__";
+
+// Synthetic "participant" id for the aggregated average / leaderboard view.
+export const CONSENSUS_ID = "__consensus__";

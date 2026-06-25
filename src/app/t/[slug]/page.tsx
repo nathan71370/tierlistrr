@@ -40,6 +40,8 @@ export default async function TierlistPage({
         canEdit={view.canEdit}
         isOwner={view.isOwner}
         isAuthed={view.isAuthed}
+        isConsensus={view.isConsensus}
+        consensusAvailable={view.consensusAvailable}
         aiEnabled={isAiConfigured()}
       />
     </>

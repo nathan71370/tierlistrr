@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { tierlists, tiers, items, placements, user } from "@/db/schema";
 import { and, asc, desc, eq, getTableColumns, inArray } from "drizzle-orm";
 import type { Item, Tier, Tierlist } from "@/db/schema";
+import { CONSENSUS_ID } from "@/lib/constants";
 
 function displayName(name?: string | null, email?: string | null): string | null {
   const n = name?.trim();
@@ -66,6 +67,8 @@ export type TierlistView = {
   canEdit: boolean;
   isOwner: boolean;
   isAuthed: boolean;
+  isConsensus: boolean;
+  consensusAvailable: boolean;
 };
 
 export async function getTierlistView(
@@ -125,15 +128,51 @@ export async function getTierlistView(
       a.label.localeCompare(b.label),
   );
 
+  const consensusAvailable = placedUsers.length > 0;
   const valid = new Set(participants.map((p) => p.userId));
   let viewedUserId: string | null = null;
-  if (requestedUserId && valid.has(requestedUserId)) viewedUserId = requestedUserId;
+  if (requestedUserId === CONSENSUS_ID && consensusAvailable) viewedUserId = CONSENSUS_ID;
+  else if (requestedUserId && valid.has(requestedUserId)) viewedUserId = requestedUserId;
   else if (currentUserId && valid.has(currentUserId)) viewedUserId = currentUserId;
   else if (tierlist.ownerId && valid.has(tierlist.ownerId)) viewedUserId = tierlist.ownerId;
   else viewedUserId = participants[0]?.userId ?? null;
 
+  const isConsensus = viewedUserId === CONSENSUS_ID;
   const placementMap: PlacementMap = {};
-  if (viewedUserId) {
+
+  if (isConsensus) {
+    // Average each item's tier index across everyone who ranked it (pool ignored),
+    // then drop it into the nearest tier — a consensus leaderboard.
+    const all = await db
+      .select({ itemId: placements.itemId, tierId: placements.tierId })
+      .from(placements)
+      .where(eq(placements.tierlistId, tierlist.id));
+    const tierIndex = new Map(tierRows.map((t, i) => [t.id, i]));
+    const acc = new Map<string, number[]>();
+    for (const p of all) {
+      if (p.tierId && tierIndex.has(p.tierId)) {
+        const arr = acc.get(p.itemId) ?? [];
+        arr.push(tierIndex.get(p.tierId)!);
+        acc.set(p.itemId, arr);
+      }
+    }
+    const byTier = new Map<string, { itemId: string; avg: number }[]>();
+    for (const [itemId, arr] of acc) {
+      const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+      const idx = Math.min(tierRows.length - 1, Math.max(0, Math.round(avg)));
+      const tierId = tierRows[idx]?.id;
+      if (!tierId) continue;
+      const list = byTier.get(tierId) ?? [];
+      list.push({ itemId, avg });
+      byTier.set(tierId, list);
+    }
+    for (const [tierId, list] of byTier) {
+      list.sort((a, b) => a.avg - b.avg);
+      list.forEach((e, i) => {
+        placementMap[e.itemId] = { tierId, position: i };
+      });
+    }
+  } else if (viewedUserId) {
     const rows = await db
       .select()
       .from(placements)
@@ -154,5 +193,7 @@ export async function getTierlistView(
     canEdit: Boolean(currentUserId && viewedUserId === currentUserId),
     isOwner: Boolean(currentUserId && currentUserId === tierlist.ownerId),
     isAuthed: Boolean(currentUserId),
+    isConsensus,
+    consensusAvailable,
   };
 }
