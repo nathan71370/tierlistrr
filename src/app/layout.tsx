@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -31,6 +31,14 @@ export const metadata: Metadata = {
   title: "Tierlistrr — crée tes tier lists",
   description:
     "Crée, visualise et range n'importe quelle tier list (fromages, sauces piquantes, cocktails…) en glissant les éléments.",
+};
+
+// App-like feel on mobile: no pinch / double-tap zoom.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

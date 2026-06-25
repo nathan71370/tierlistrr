@@ -26,10 +26,10 @@ export function HeaderAuth() {
         <button
           onClick={() => setProfileOpen(true)}
           title="Modifier ton nom"
-          className="group hidden max-w-[200px] items-center gap-1.5 truncate text-sm text-ink-soft hover:text-ink sm:inline-flex"
+          className="group inline-flex max-w-[100px] items-center gap-1.5 text-sm text-ink-soft hover:text-ink sm:max-w-[200px]"
         >
           <span className="truncate">{label}</span>
-          <Pencil size={13} className="shrink-0 opacity-0 transition group-hover:opacity-70" />
+          <Pencil size={13} className="shrink-0 opacity-60 transition group-hover:opacity-100" />
         </button>
         <Button
           size="sm"

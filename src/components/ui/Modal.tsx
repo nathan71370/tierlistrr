@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,9 +32,11 @@ export function Modal({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  // Portal to <body> so the overlay escapes any ancestor that creates a
+  // containing block (e.g. the header's backdrop-blur) and covers the viewport.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/30 p-4 sm:p-8 backdrop-blur-[3px]"
       onMouseDown={(e) => {
@@ -61,6 +64,7 @@ export function Modal({
         </div>
         <div className="px-6 pb-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
