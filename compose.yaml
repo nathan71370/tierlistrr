@@ -24,7 +24,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.tierlistrr.rule=Host(`tierlistrr.example.com`)"
       - "traefik.http.routers.tierlistrr.entrypoints=websecure"
-      - "traefik.http.routers.adguard.tls=true"
+      - "traefik.http.routers.tierlistrr.tls=true"
       - "traefik.http.services.tierlistrr.loadbalancer.server.port=3000"
 
 volumes:
