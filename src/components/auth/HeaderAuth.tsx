@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +10,7 @@ import { SignInModal } from "./SignInModal";
 import { ProfileModal } from "./ProfileModal";
 
 export function HeaderAuth() {
+  const t = useTranslations("header");
   const { data, isPending } = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -25,7 +27,7 @@ export function HeaderAuth() {
       <div className="flex items-center gap-2">
         <button
           onClick={() => setProfileOpen(true)}
-          title="Modifier ton nom"
+          title={t("editName")}
           className="group inline-flex max-w-[100px] items-center gap-1.5 text-sm text-ink-soft hover:text-ink sm:max-w-[200px]"
         >
           <span className="truncate">{label}</span>
@@ -42,7 +44,7 @@ export function HeaderAuth() {
             })
           }
         >
-          Déconnexion
+          {t("signOut")}
         </Button>
         <ProfileModal
           open={profileOpen}
@@ -57,7 +59,7 @@ export function HeaderAuth() {
   return (
     <>
       <Button size="sm" onClick={() => setOpen(true)}>
-        Se connecter
+        {t("signIn")}
       </Button>
       <SignInModal open={open} onClose={() => setOpen(false)} />
     </>

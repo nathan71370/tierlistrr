@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import { getAllTierlists } from "@/lib/data";
 import { auth } from "@/lib/auth";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -8,11 +9,17 @@ import { TierlistCard } from "@/components/TierlistCard";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [lists, session] = await Promise.all([
+  const [lists, session, t] = await Promise.all([
     getAllTierlists(),
     auth.api.getSession({ headers: await headers() }),
+    getTranslations("home"),
   ]);
   const currentUserId = session?.user?.id ?? null;
+
+  const richTags = {
+    em: (c: React.ReactNode) => <em>{c}</em>,
+    hot: (c: React.ReactNode) => <span className="text-terracotta">{c}</span>,
+  };
 
   return (
     <>
@@ -27,15 +34,12 @@ export default async function Home() {
             T
           </span>
           <div className="relative max-w-2xl">
-            <p className="kicker mb-5 text-terracotta">Tier lists collaboratives</p>
+            <p className="kicker mb-5 text-terracotta">{t("kicker")}</p>
             <h1 className="display text-5xl text-ink sm:text-[64px]">
-              Classe <em>n&apos;importe quoi</em>, du{" "}
-              <span className="text-terracotta">meilleur</span> au{" "}
-              <em>pire</em>.
+              {t.rich("heroTitle", richTags)}
             </h1>
             <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-ink-soft">
-              Fromages, sauces piquantes, cocktails… Crée une tier list, ajoute
-              des photos, et glisse chaque élément à sa place.
+              {t("heroSubtitle")}
             </p>
             <div className="mt-8">
               <CreateTierlistButton />
@@ -45,10 +49,8 @@ export default async function Home() {
 
         {lists.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-[var(--radius-lg)] border border-dashed border-line bg-surface/40 py-24 text-center">
-            <p className="display text-3xl text-ink">
-              Aucune tier list <em>pour l&apos;instant</em>.
-            </p>
-            <p className="text-sm text-muted">Crée la première — ça prend dix secondes.</p>
+            <p className="display text-3xl text-ink">{t.rich("emptyTitle", richTags)}</p>
+            <p className="text-sm text-muted">{t("emptySubtitle")}</p>
             <div className="mt-2">
               <CreateTierlistButton variant="secondary" />
             </div>
@@ -64,8 +66,8 @@ export default async function Home() {
 
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-6">
-          <span className="kicker">Disponible · open source</span>
-          <span className="text-[11px] text-muted">Remake de OpenTierBoy</span>
+          <span className="kicker">{t("footerStatus")}</span>
+          <span className="text-[11px] text-muted">{t("footerTagline")}</span>
         </div>
       </footer>
     </>

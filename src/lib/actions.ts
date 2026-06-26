@@ -5,9 +5,12 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { tierlists, tiers, items, placements } from "@/db/schema";
 import { auth } from "@/lib/auth";
+
+const et = () => getTranslations("errors");
 import { slugify } from "@/lib/slug";
 import { DEFAULT_TIERS } from "@/lib/constants";
 import { generateItemNames } from "@/lib/ai";
@@ -16,7 +19,7 @@ import { enqueueImage } from "@/lib/imageQueue";
 
 async function requireUser() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error("Connecte-toi pour faire ça.");
+  if (!session?.user) throw new Error((await et())("signInRequired"));
   return session.user;
 }
 
@@ -28,9 +31,10 @@ async function requireOwnerByTierlist(tierlistId: string) {
     .from(tierlists)
     .where(eq(tierlists.id, tierlistId))
     .limit(1);
-  if (!r[0]) throw new Error("Tier list introuvable.");
+  const t = await et();
+  if (!r[0]) throw new Error(t("listNotFound"));
   if (!r[0].ownerId || r[0].ownerId !== u.id) {
-    throw new Error("Seul le créateur peut modifier cette liste.");
+    throw new Error(t("ownerOnly"));
   }
   return u;
 }
@@ -41,7 +45,7 @@ async function tierlistIdOfItem(itemId: string): Promise<string> {
     .from(items)
     .where(eq(items.id, itemId))
     .limit(1);
-  if (!r[0]) throw new Error("Élément introuvable.");
+  if (!r[0]) throw new Error((await et())("itemNotFound"));
   return r[0].tierlistId;
 }
 
@@ -51,7 +55,7 @@ async function tierlistIdOfTier(tierId: string): Promise<string> {
     .from(tiers)
     .where(eq(tiers.id, tierId))
     .limit(1);
-  if (!r[0]) throw new Error("Tier introuvable.");
+  if (!r[0]) throw new Error((await et())("tierNotFound"));
   return r[0].tierlistId;
 }
 
@@ -84,7 +88,7 @@ export async function createTierlist(formData: FormData) {
   const user = await requireUser();
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  if (!title) throw new Error("Le titre est obligatoire.");
+  if (!title) throw new Error((await et())("titleRequired"));
 
   const now = new Date();
   const id = nanoid();
@@ -135,7 +139,7 @@ export async function renameTierlist(
 ) {
   await requireOwnerByTierlist(id);
   const t = title.trim();
-  if (!t) throw new Error("Le titre est obligatoire.");
+  if (!t) throw new Error((await et())("titleRequired"));
   await db
     .update(tierlists)
     .set({ title: t, description: description.trim() || null, updatedAt: new Date() })
@@ -150,8 +154,9 @@ export async function renameTierlist(
 export async function addItem(formData: FormData) {
   const tierlistId = String(formData.get("tierlistId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
-  if (!tierlistId) throw new Error("Tier list introuvable.");
-  if (!name) throw new Error("Le nom de l'élément est obligatoire.");
+  const te = await et();
+  if (!tierlistId) throw new Error(te("listNotFound"));
+  if (!name) throw new Error(te("itemNameRequired"));
   await requireOwnerByTierlist(tierlistId);
 
   const wantsAiImage = String(formData.get("generateImage") ?? "") === "1";
@@ -209,10 +214,11 @@ export async function generateItems(
   topic: string,
   count: number,
 ): Promise<{ created: number }> {
-  if (!tierlistId) throw new Error("Tier list introuvable.");
+  const te = await et();
+  if (!tierlistId) throw new Error(te("listNotFound"));
   await requireOwnerByTierlist(tierlistId);
   const cleanTopic = topic.trim();
-  if (!cleanTopic) throw new Error("Donne un thème pour la génération.");
+  if (!cleanTopic) throw new Error(te("topicRequired"));
   const n = Math.max(1, Math.min(24, Math.round(count) || 12));
 
   const names = await generateItemNames(cleanTopic, n);
@@ -246,7 +252,7 @@ export async function generateItems(
 export async function renameItem(id: string, name: string) {
   await requireOwnerByItem(id);
   const n = name.trim();
-  if (!n) throw new Error("Le nom est obligatoire.");
+  if (!n) throw new Error((await et())("nameRequired"));
   await db.update(items).set({ name: n }).where(eq(items.id, id));
 }
 
@@ -310,10 +316,11 @@ export async function addTier(tierlistId: string) {
     .from(tiers)
     .where(eq(tiers.tierlistId, tierlistId));
   const nextPos = existing.reduce((max, r) => Math.max(max, r.position), -1) + 1;
+  const tt = await getTranslations("tier");
   await db.insert(tiers).values({
     id: nanoid(),
     tierlistId,
-    label: "Nouveau",
+    label: tt("newLabel"),
     color: "#8a8076",
     position: nextPos,
   });

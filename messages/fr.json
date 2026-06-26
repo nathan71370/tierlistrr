@@ -1,0 +1,158 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "saving": "Enregistrement",
+    "saved": "Enregistré"
+  },
+  "lang": {
+    "label": "Langue"
+  },
+  "header": {
+    "signIn": "Se connecter",
+    "signOut": "Déconnexion",
+    "editName": "Modifier ton nom"
+  },
+  "home": {
+    "kicker": "Tier lists collaboratives",
+    "heroTitle": "Classe <em>n'importe quoi</em>, du <hot>meilleur</hot> au <em>pire</em>.",
+    "heroSubtitle": "Fromages, sauces piquantes, cocktails… Crée une tier list, ajoute des photos, et glisse chaque élément à sa place.",
+    "newList": "Nouvelle tier list",
+    "emptyTitle": "Aucune tier list <em>pour l'instant</em>.",
+    "emptySubtitle": "Crée la première — ça prend dix secondes.",
+    "footerStatus": "Disponible · open source",
+    "footerTagline": "Crée et partage des tier lists",
+    "by": "par {name}",
+    "items": "{count, plural, =0 {aucun élément} one {# élément} other {# éléments}}",
+    "emptyThumbs": "Vide — ajoute des éléments"
+  },
+  "create": {
+    "title": "Nouvelle tier list",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "ex. Sauces piquantes, Cocktails, Fromages…",
+    "descLabel": "Description (optionnel)",
+    "descPlaceholder": "De quoi parle cette tier list ?",
+    "hint": "On créera 5 tiers par défaut (S, A, B, C, D). Tu pourras tout renommer et ajouter tes éléments ensuite.",
+    "submit": "Créer la tier list",
+    "creating": "Création…"
+  },
+  "auth": {
+    "title": "Connexion",
+    "emailIntro": "Entre ton email : on t'envoie un code à 6 chiffres. Pas de mot de passe, et ça crée ton compte si tu n'en as pas encore.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "toi@exemple.com",
+    "sendCode": "Recevoir le code",
+    "sending": "Envoi…",
+    "codeSentTo": "Code envoyé à {email}.",
+    "codeLabel": "Code à 6 chiffres",
+    "changeEmail": "← Changer d'email",
+    "verify": "Se connecter",
+    "verifying": "Vérification…",
+    "errorSend": "Échec de l'envoi du code.",
+    "errorVerify": "Code invalide ou expiré."
+  },
+  "profile": {
+    "title": "Ton profil",
+    "loggedInAs": "Connecté en tant que {email}.",
+    "nameLabel": "Nom affiché",
+    "namePlaceholder": "ex. Nathan",
+    "nameHint": "C'est ce nom qui apparaît sur tes classements et tes listes.",
+    "errorUpdate": "Échec de la mise à jour."
+  },
+  "board": {
+    "backToLists": "Toutes les listes",
+    "share": "Partager",
+    "copied": "Copié !",
+    "settings": "Réglages",
+    "generate": "Générer",
+    "add": "Ajouter",
+    "imagesGenerating": "{count, plural, one {# image} other {# images}}",
+    "rankingOf": "Classement de",
+    "average": "Moyenne",
+    "you": "Toi",
+    "creatorTag": "créateur",
+    "readOnlyConsensus": "Classement <b>moyen</b> de tous les participants — lecture seule.",
+    "readOnlyUser": "Tu regardes le classement de <b>{name}</b> — lecture seule.",
+    "readOnlyUserFallback": "ce participant",
+    "makeMine": "Faire mon classement",
+    "readOnlySignedOut": "Lecture seule. Connecte-toi pour faire ton propre classement.",
+    "toRank": "À classer",
+    "waiting": "{count} en attente",
+    "addTier": "Ajouter un tier",
+    "allRanked": "Tout est classé — beau travail.",
+    "noItems": "Aucun élément à classer.",
+    "editTierTitle": "Modifier ce tier"
+  },
+  "addItem": {
+    "title": "Ajouter un élément",
+    "nameLabel": "Nom",
+    "namePlaceholder": "ex. Moscow Mule",
+    "image": "Image",
+    "modeAi": "Générer (IA)",
+    "modeUpload": "Uploader",
+    "modeNone": "Sans image",
+    "aiNote": "L'image sera générée en arrière-plan d'après le nom et le thème de la liste. L'élément est utilisable immédiatement.",
+    "uploadChange": "Changer l'image",
+    "uploadChoose": "Choisir une image (PNG, JPG, WebP…)",
+    "added": "{count, plural, one {# ajouté} other {# ajoutés}}",
+    "addTip": "Astuce : enchaîne les ajouts",
+    "adding": "Ajout…",
+    "add": "Ajouter",
+    "error": "Une erreur est survenue."
+  },
+  "generate": {
+    "title": "Générer avec l'IA",
+    "intro": "L'IA propose une liste d'éléments pour ton thème. Ils arrivent <b>tout de suite</b> dans « à classer » (tu peux déjà les ranger), et leurs images se génèrent ensuite en arrière-plan.",
+    "topicLabel": "Thème",
+    "topicPlaceholder": "ex. Cocktails de l'été, Fromages français…",
+    "countLabel": "Nombre d'éléments",
+    "note": "Images en arrière-plan · Pollinations",
+    "generating": "Génération…",
+    "generate": "Générer",
+    "error": "La génération a échoué."
+  },
+  "editTier": {
+    "title": "Modifier le tier",
+    "labelLabel": "Libellé",
+    "colorLabel": "Couleur",
+    "deleteConfirm": "Supprimer ce tier ? Ses éléments retournent dans « à classer »."
+  },
+  "itemModal": {
+    "title": "Élément",
+    "nameLabel": "Nom",
+    "regen": "Générer / régénérer l'image",
+    "regenerating": "Génération…",
+    "deleteConfirm": "Supprimer « {name} » ?"
+  },
+  "editList": {
+    "title": "Réglages de la tier list",
+    "titleLabel": "Titre",
+    "descLabel": "Description",
+    "deleteList": "Supprimer la liste",
+    "deleteConfirm": "Supprimer « {title} » et tous ses éléments ?"
+  },
+  "card": {
+    "deleteConfirm": "Supprimer « {title} » ? Cette action est définitive."
+  },
+  "tier": {
+    "newLabel": "Nouveau"
+  },
+  "errors": {
+    "signInRequired": "Connecte-toi pour faire ça.",
+    "ownerOnly": "Seul le créateur peut modifier cette liste.",
+    "listNotFound": "Tier list introuvable.",
+    "itemNotFound": "Élément introuvable.",
+    "tierNotFound": "Tier introuvable.",
+    "titleRequired": "Le titre est obligatoire.",
+    "nameRequired": "Le nom est obligatoire.",
+    "itemNameRequired": "Le nom de l'élément est obligatoire.",
+    "topicRequired": "Donne un thème pour la génération.",
+    "imageFormat": "Format d'image non supporté.",
+    "imageTooLarge": "Image trop volumineuse (max 8 Mo).",
+    "aiNotConfigured": "L'IA n'est pas configurée. Ajoute une variable d'environnement GROQ_API_KEY.",
+    "aiCall": "Échec de l'appel à l'IA ({status}). {detail}",
+    "aiEmpty": "L'IA n'a renvoyé aucun élément exploitable."
+  }
+}

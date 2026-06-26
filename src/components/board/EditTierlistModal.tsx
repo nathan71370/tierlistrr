@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { renameTierlist, deleteTierlist } from "@/lib/actions";
 import { Modal } from "@/components/ui/Modal";
@@ -20,6 +21,8 @@ export function EditTierlistModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useTranslations("editList");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [title, setTitle] = useState(tierlist.title);
   const [description, setDescription] = useState(tierlist.description ?? "");
@@ -34,7 +37,7 @@ export function EditTierlistModal({
   }
 
   function remove() {
-    if (!confirm(`Supprimer « ${tierlist.title} » et tous ses éléments ?`)) return;
+    if (!confirm(t("deleteConfirm", { title: tierlist.title }))) return;
     start(async () => {
       await deleteTierlist(tierlist.id);
       router.push("/");
@@ -42,10 +45,10 @@ export function EditTierlistModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Réglages de la tier list">
+    <Modal open={open} onClose={onClose} title={t("title")}>
       <div className="space-y-4">
         <div>
-          <Label htmlFor="tl-title">Titre</Label>
+          <Label htmlFor="tl-title">{t("titleLabel")}</Label>
           <Input
             id="tl-title"
             value={title}
@@ -54,7 +57,7 @@ export function EditTierlistModal({
           />
         </div>
         <div>
-          <Label htmlFor="tl-desc">Description</Label>
+          <Label htmlFor="tl-desc">{t("descLabel")}</Label>
           <Textarea
             id="tl-desc"
             value={description}
@@ -64,14 +67,14 @@ export function EditTierlistModal({
         <div className="flex items-center justify-between pt-1">
           <Button type="button" variant="danger" onClick={remove} disabled={pending}>
             <Trash2 size={15} />
-            Supprimer la liste
+            {t("deleteList")}
           </Button>
           <div className="flex gap-2">
             <Button type="button" variant="ghost" onClick={onClose}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="button" onClick={save} disabled={pending || !title.trim()}>
-              {pending ? "…" : "Enregistrer"}
+              {pending ? "…" : tc("save")}
             </Button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HeaderAuth } from "@/components/auth/HeaderAuth";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function SiteHeader() {
   return (
@@ -11,7 +12,10 @@ export function SiteHeader() {
             tierlistrr
           </span>
         </Link>
-        <HeaderAuth />
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSwitcher />
+          <HeaderAuth />
+        </div>
       </div>
     </header>
   );

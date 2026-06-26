@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { ImagePlus, Sparkles, Upload } from "lucide-react";
 import { addItem } from "@/lib/actions";
 import { Modal } from "@/components/ui/Modal";
@@ -23,6 +24,8 @@ export function AddItemModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useTranslations("addItem");
+  const tc = useTranslations("common");
   const [pending, start] = useTransition();
   const [mode, setMode] = useState<Mode>(aiEnabled ? "ai" : "upload");
   const [preview, setPreview] = useState<string | null>(null);
@@ -50,17 +53,17 @@ export function AddItemModal({
         reset();
         onSaved();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Une erreur est survenue.");
+        setError(err instanceof Error ? err.message : t("error"));
       }
     });
   }
 
   const modes: { key: Mode; label: string; icon: React.ReactNode }[] = [
     ...(aiEnabled
-      ? [{ key: "ai" as Mode, label: "Générer (IA)", icon: <Sparkles size={14} /> }]
+      ? [{ key: "ai" as Mode, label: t("modeAi"), icon: <Sparkles size={14} /> }]
       : []),
-    { key: "upload", label: "Uploader", icon: <Upload size={14} /> },
-    { key: "none", label: "Sans image", icon: null },
+    { key: "upload", label: t("modeUpload"), icon: <Upload size={14} /> },
+    { key: "none", label: t("modeNone"), icon: null },
   ];
 
   return (
@@ -70,23 +73,23 @@ export function AddItemModal({
         setAdded(0);
         onClose();
       }}
-      title="Ajouter un élément"
+      title={t("title")}
     >
       <form ref={formRef} onSubmit={submit} className="space-y-4">
         <div>
-          <Label htmlFor="item-name">Nom</Label>
+          <Label htmlFor="item-name">{t("nameLabel")}</Label>
           <Input
             id="item-name"
             name="name"
             ref={nameRef}
             required
             autoFocus
-            placeholder="ex. Moscow Mule"
+            placeholder={t("namePlaceholder")}
           />
         </div>
 
         <div>
-          <Label>Image</Label>
+          <Label>{t("image")}</Label>
           <div className="mb-3 flex gap-2">
             {modes.map((m) => (
               <button
@@ -108,8 +111,7 @@ export function AddItemModal({
 
           {mode === "ai" ? (
             <p className="rounded-[var(--radius-sm)] bg-cream-deep px-3 py-2.5 text-sm text-ink-soft">
-              L&apos;image sera générée en arrière-plan d&apos;après le nom et le
-              thème de la liste. L&apos;élément est utilisable immédiatement.
+              {t("aiNote")}
             </p>
           ) : null}
 
@@ -124,7 +126,7 @@ export function AddItemModal({
                 </span>
               )}
               <span className="text-sm text-ink-soft">
-                {preview ? "Changer l'image" : "Choisir une image (PNG, JPG, WebP…)"}
+                {preview ? t("uploadChange") : t("uploadChoose")}
               </span>
               <input
                 type="file"
@@ -144,7 +146,7 @@ export function AddItemModal({
 
         <div className="flex items-center justify-between pt-1">
           <span className="kicker">
-            {added > 0 ? `${added} ajouté${added > 1 ? "s" : ""}` : "Astuce : enchaîne les ajouts"}
+            {added > 0 ? t("added", { count: added }) : t("addTip")}
           </span>
           <div className="flex gap-2">
             <Button
@@ -155,10 +157,10 @@ export function AddItemModal({
                 onClose();
               }}
             >
-              Fermer
+              {tc("close")}
             </Button>
             <Button type="submit" disabled={pending}>
-              {pending ? "Ajout…" : "Ajouter"}
+              {pending ? t("adding") : t("add")}
             </Button>
           </div>
         </div>

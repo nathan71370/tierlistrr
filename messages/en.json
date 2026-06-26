@@ -1,0 +1,158 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "saving": "Saving",
+    "saved": "Saved"
+  },
+  "lang": {
+    "label": "Language"
+  },
+  "header": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "editName": "Edit your name"
+  },
+  "home": {
+    "kicker": "Collaborative tier lists",
+    "heroTitle": "Rank <em>literally anything</em>, from <hot>best</hot> to <em>worst</em>.",
+    "heroSubtitle": "Cheeses, hot sauces, cocktails… Create a tier list, add photos, and drag each item into place.",
+    "newList": "New tier list",
+    "emptyTitle": "No tier lists <em>yet</em>.",
+    "emptySubtitle": "Create the first one — it takes ten seconds.",
+    "footerStatus": "Available · open source",
+    "footerTagline": "Create and share tier lists",
+    "by": "by {name}",
+    "items": "{count, plural, =0 {no items} one {# item} other {# items}}",
+    "emptyThumbs": "Empty — add items"
+  },
+  "create": {
+    "title": "New tier list",
+    "titleLabel": "Title",
+    "titlePlaceholder": "e.g. Hot sauces, Cocktails, Cheeses…",
+    "descLabel": "Description (optional)",
+    "descPlaceholder": "What's this tier list about?",
+    "hint": "We'll create 5 default tiers (S, A, B, C, D). You can rename everything and add your items afterwards.",
+    "submit": "Create tier list",
+    "creating": "Creating…"
+  },
+  "auth": {
+    "title": "Sign in",
+    "emailIntro": "Enter your email and we'll send a 6-digit code. No password, and it creates your account if you don't have one yet.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "codeSentTo": "Code sent to {email}.",
+    "codeLabel": "6-digit code",
+    "changeEmail": "← Change email",
+    "verify": "Sign in",
+    "verifying": "Verifying…",
+    "errorSend": "Couldn't send the code.",
+    "errorVerify": "Invalid or expired code."
+  },
+  "profile": {
+    "title": "Your profile",
+    "loggedInAs": "Signed in as {email}.",
+    "nameLabel": "Display name",
+    "namePlaceholder": "e.g. Nathan",
+    "nameHint": "This is the name shown on your rankings and lists.",
+    "errorUpdate": "Update failed."
+  },
+  "board": {
+    "backToLists": "All lists",
+    "share": "Share",
+    "copied": "Copied!",
+    "settings": "Settings",
+    "generate": "Generate",
+    "add": "Add",
+    "imagesGenerating": "{count, plural, one {# image} other {# images}}",
+    "rankingOf": "Ranking by",
+    "average": "Average",
+    "you": "You",
+    "creatorTag": "creator",
+    "readOnlyConsensus": "<b>Average</b> ranking of all participants — read-only.",
+    "readOnlyUser": "You're viewing <b>{name}</b>'s ranking — read-only.",
+    "readOnlyUserFallback": "this participant",
+    "makeMine": "Make my ranking",
+    "readOnlySignedOut": "Read-only. Sign in to make your own ranking.",
+    "toRank": "To rank",
+    "waiting": "{count} waiting",
+    "addTier": "Add a tier",
+    "allRanked": "Everything's ranked — nice.",
+    "noItems": "No items to rank.",
+    "editTierTitle": "Edit this tier"
+  },
+  "addItem": {
+    "title": "Add an item",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Moscow Mule",
+    "image": "Image",
+    "modeAi": "Generate (AI)",
+    "modeUpload": "Upload",
+    "modeNone": "No image",
+    "aiNote": "The image will be generated in the background from the name and the list's topic. The item is usable right away.",
+    "uploadChange": "Change image",
+    "uploadChoose": "Choose an image (PNG, JPG, WebP…)",
+    "added": "{count, plural, one {# added} other {# added}}",
+    "addTip": "Tip: add several in a row",
+    "adding": "Adding…",
+    "add": "Add",
+    "error": "Something went wrong."
+  },
+  "generate": {
+    "title": "Generate with AI",
+    "intro": "AI suggests a list of items for your topic. They show up <b>right away</b> in \"to rank\" (you can start ranking), and their images are generated afterwards in the background.",
+    "topicLabel": "Topic",
+    "topicPlaceholder": "e.g. Summer cocktails, French cheeses…",
+    "countLabel": "Number of items",
+    "note": "Images in the background · Pollinations",
+    "generating": "Generating…",
+    "generate": "Generate",
+    "error": "Generation failed."
+  },
+  "editTier": {
+    "title": "Edit tier",
+    "labelLabel": "Label",
+    "colorLabel": "Color",
+    "deleteConfirm": "Delete this tier? Its items go back to \"to rank\"."
+  },
+  "itemModal": {
+    "title": "Item",
+    "nameLabel": "Name",
+    "regen": "Generate / regenerate image",
+    "regenerating": "Generating…",
+    "deleteConfirm": "Delete \"{name}\"?"
+  },
+  "editList": {
+    "title": "Tier list settings",
+    "titleLabel": "Title",
+    "descLabel": "Description",
+    "deleteList": "Delete list",
+    "deleteConfirm": "Delete \"{title}\" and all its items?"
+  },
+  "card": {
+    "deleteConfirm": "Delete \"{title}\"? This cannot be undone."
+  },
+  "tier": {
+    "newLabel": "New"
+  },
+  "errors": {
+    "signInRequired": "Sign in to do that.",
+    "ownerOnly": "Only the creator can edit this list.",
+    "listNotFound": "Tier list not found.",
+    "itemNotFound": "Item not found.",
+    "tierNotFound": "Tier not found.",
+    "titleRequired": "A title is required.",
+    "nameRequired": "A name is required.",
+    "itemNameRequired": "The item name is required.",
+    "topicRequired": "Give a topic to generate from.",
+    "imageFormat": "Unsupported image format.",
+    "imageTooLarge": "Image too large (max 8 MB).",
+    "aiNotConfigured": "AI isn't configured. Set the GROQ_API_KEY environment variable.",
+    "aiCall": "AI call failed ({status}). {detail}",
+    "aiEmpty": "The AI returned no usable items."
+  }
+}

@@ -1,144 +1,135 @@
 # tierlistrr
 
-Crée, visualise et range **n'importe quelle** tier list — fromages, sauces piquantes,
-cocktails… — en glissant des éléments (avec photos) du meilleur au pire.
+Create, share and rank **anything** as a tier list — cheeses, hot sauces,
+cocktails, movies… Each tier list is a shared subject: the creator adds the
+items, and **every signed-in participant builds their own ranking** by dragging
+items into tiers. Anyone can browse the results (read-only), compare each
+participant's ranking, and see the aggregated **average leaderboard**.
 
-Remake open source de [OpenTierBoy](https://github.com/infinia-yzl/opentierboy),
-pensé pour l'auto-hébergement : pas de compte, pas de connexion, une seule base
-SQLite. On arrive sur la page d'accueil, on voit toutes les tier lists, on en crée
-une, on la visualise ou on la modifie.
+Self-hostable, no third-party account required, a single SQLite file for storage.
 
-## Stack
+<!-- Add screenshots here -->
 
-- **Next.js 16** (App Router) + **React 19** + **TypeScript**
-- **Tailwind CSS v4** — tokens du design system *marathon* (voir plus bas)
-- **Drizzle ORM** sur **libSQL/SQLite** (`@libsql/client`, fichier local)
-- **@hello-pangea/dnd** pour le glisser-déposer
-- Server Actions pour toutes les mutations, images stockées sur disque
-- **IA** : génération d'éléments via **Groq** (API compatible OpenAI) + images
-  via **Pollinations** (sans clé)
-- **Auth** : **better-auth** (code OTP par email, sans mot de passe), emails via SMTP
+## Features
 
-## Démarrer en développement
+- 🧱 **Tier lists** with custom tiers (label + color) and a drag-and-drop board
+- 👥 **Multi-user** — one shared list, one ranking per participant
+- 🏆 **Average leaderboard** — aggregated consensus ranking across participants
+- 🔗 **Public & shareable** — anyone can view via a link; sign in to participate
+- 🔑 **Passwordless auth** — email one-time code (better-auth)
+- 🖼️ **Images** — upload your own, or **generate them with AI**
+  (item names via an LLM, pictures via Pollinations), processed in the background
+- 🌍 **i18n** — fully translated via message files; switch language with the flag
+  picker (English & French included, easy to add more)
+- 📦 **Self-hosted** — Docker / Docker Compose, single data volume
+
+## Tech stack
+
+- [Next.js](https://nextjs.org) (App Router) + React + TypeScript
+- [Tailwind CSS](https://tailwindcss.com) v4
+- [Drizzle ORM](https://orm.drizzle.team) on **libSQL / SQLite** (single local file)
+- [@hello-pangea/dnd](https://github.com/hello-pangea/dnd) for drag-and-drop
+- [better-auth](https://better-auth.com) (email OTP) · [next-intl](https://next-intl.dev) (i18n)
+- AI (optional): [Groq](https://groq.com) (OpenAI-compatible LLM) + [Pollinations](https://pollinations.ai) (images)
+
+## Quick start (development)
 
 ```bash
+git clone https://github.com/nathan71370/tierlistrr.git
+cd tierlistrr
 npm install
-npm run dev
-# http://localhost:3000
+cp .env.example .env.local   # then edit (see Configuration)
+npm run dev                  # http://localhost:3000
 ```
 
-La base et le dossier d'uploads sont créés automatiquement au premier lancement
-dans `./data` (ignoré par git). Aucune étape de migration : le schéma est appliqué
-de façon idempotente au démarrage.
+The database and uploads directory are created automatically on first run under
+`./data` (git-ignored). There is **no migration step** — the schema is applied
+idempotently at startup.
 
-## Auto-hébergement (production)
+> Without SMTP configured, sign-in OTP codes are printed to the server logs, so
+> you can test authentication locally without an email provider.
+
+## Configuration
+
+All configuration is via environment variables. Copy `.env.example` and fill in
+what you need — everything is optional except `BETTER_AUTH_SECRET` in production.
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `BETTER_AUTH_SECRET` | **Required in production** — random secret (`openssl rand -base64 32`) | — |
+| `BETTER_AUTH_URL` | Public app URL (cookies / CSRF) | inferred from request |
+| `DATA_DIR` | Directory for the SQLite database **and** uploaded images | `./data` |
+| `DATABASE_URL` | Explicit libSQL URL (e.g. `file:/var/lib/tierlistrr/app.db`) | derived from `DATA_DIR` |
+| `PORT` | HTTP port | `3000` |
+| `SMTP_HOST` / `SMTP_PORT` | SMTP server for OTP emails (Gmail: `smtp.gmail.com` / `587`) | — |
+| `SMTP_USER` / `SMTP_PASS` | SMTP credentials (Gmail: address + **app password**) | — |
+| `SMTP_FROM` | From address for emails | `SMTP_USER` |
+| `GROQ_API_KEY` | Enables AI item generation (free key at [console.groq.com](https://console.groq.com)) | — |
+| `GROQ_MODEL` | LLM model | `llama-3.3-70b-versatile` |
+| `GROQ_BASE_URL` | OpenAI-compatible endpoint | `https://api.groq.com/openai/v1` |
+| `POLLINATIONS_TOKEN` | Pollinations secret key `sk_…` (higher image rate limits, server-side) | — |
+| `POLLINATIONS_BASE_URL` | Image service base URL | `https://image.pollinations.ai` |
+| `IMAGE_CONCURRENCY` | Parallel background image downloads | `2` |
+
+### Authentication & email
+
+Auth is passwordless: users enter their email and receive a 6-digit code. To send
+real emails, configure SMTP. With Gmail / Google Workspace, use
+`smtp.gmail.com:587`, your address as `SMTP_USER`, and an
+[App Password](https://myaccount.google.com/apppasswords) as `SMTP_PASS`
+(the regular account password won't work). Without SMTP, codes are logged to the
+container output.
+
+### AI images (optional)
+
+With `GROQ_API_KEY` set, a **Generate** button appears: the LLM proposes items
+for the list's topic, and each gets an image from Pollinations. Items appear
+instantly and are usable right away; images are downloaded to disk in the
+background. No key → the feature is simply hidden and the app works normally.
+
+## Self-hosting with Docker
+
+The repo ships a multi-stage `Dockerfile` (Next.js standalone, non-root) and a
+`compose.yaml`. Persist the named volume `tierlistrr-data` (mounted at `/data`) —
+it holds the SQLite database and uploaded images.
 
 ```bash
-npm run build
-npm run start          # PORT=3000 par défaut
+BETTER_AUTH_SECRET=$(openssl rand -base64 32) docker compose up -d --build
 ```
 
-Variables d'environnement :
+The provided `compose.yaml` is also ready for [Komodo](https://komo.do) and
+includes [Traefik](https://traefik.io) labels — adjust the host rule to your
+domain, and set secrets in your platform's environment.
 
-| Variable        | Rôle                                                         | Défaut               |
-| --------------- | ------------------------------------------------------------ | -------------------- |
-| `DATA_DIR`      | Dossier de la base SQLite **et** des images uploadées        | `./data`             |
-| `DATABASE_URL`  | URL libSQL explicite (ex. `file:/var/lib/tierlistrr/app.db`) | dérivé de `DATA_DIR` |
-| `PORT`          | Port HTTP                                                     | `3000`               |
-| `GROQ_API_KEY`  | Active la génération IA d'éléments (clé Groq gratuite)        | — (IA désactivée)    |
-| `GROQ_MODEL`    | Modèle LLM utilisé                                            | `llama-3.3-70b-versatile` |
-| `GROQ_BASE_URL` | Endpoint compatible OpenAI (pour pointer ailleurs que Groq)  | `https://api.groq.com/openai/v1` |
-| `POLLINATIONS_BASE_URL` | Base du service d'images (pour self-host/proxy)     | `https://image.pollinations.ai` |
-| `POLLINATIONS_TOKEN` | Clé secrète Pollinations **`sk_…`** (auth.pollinations.ai, usage serveur, sans limite de débit) | — |
-| `IMAGE_CONCURRENCY` | Nb d'images générées en parallèle en arrière-plan       | `2` |
-| `BETTER_AUTH_SECRET` | **Requis en prod** : secret aléatoire (`openssl rand -base64 32`) | — |
-| `BETTER_AUTH_URL` | URL publique de l'app (pour les cookies/CSRF)             | déduit de la requête |
-| `SMTP_HOST` / `SMTP_PORT` | Serveur SMTP pour l'envoi des codes OTP (Gmail : `smtp.gmail.com` / `587`) | — |
-| `SMTP_USER` / `SMTP_PASS` | Identifiants SMTP (Gmail : email + **mot de passe d'application**) | — |
-| `SMTP_FROM` | Adresse d'expéditeur des emails                          | `SMTP_USER` |
+## Internationalization
 
-Pour persister les données, montez un volume sur `DATA_DIR` (la base + le dossier
-`uploads/` y vivent). C'est tout ce qu'il faut sauvegarder.
+UI strings live in `messages/<locale>.json` (`en` and `fr` included). The active
+language is chosen with the flag switcher in the header and stored in a cookie.
 
-### IA (optionnel)
+**Add a language:**
 
-Sans `GROQ_API_KEY`, l'app fonctionne normalement et le bouton « Générer » est
-simplement masqué. Avec une clé (gratuite sur [console.groq.com](https://console.groq.com)),
-le board affiche **Générer** : l'IA propose des éléments pour le thème de la liste
-et leur associe une image générée par [Pollinations](https://pollinations.ai)
-(aucune clé requise). Les éléments arrivent **immédiatement** (classables tout de
-suite) ; les images se génèrent **en arrière-plan** (worker in-process, concurrence
-limitée + retries), sont **téléchargées et stockées sur disque**, et apparaissent
-au fur et à mesure. Un `POLLINATIONS_TOKEN` (gratuit) accélère et fiabilise tout
-ça. Idem à l'ajout manuel d'un élément : option « Générer l'image (IA) ».
+1. Copy `messages/en.json` to `messages/<code>.json` and translate the values.
+2. Add the locale to `src/i18n/config.ts` (`locales` + `localeMeta` with a label
+   and a flag emoji).
 
-## Déploiement Docker / Komodo
+That's it — PRs adding languages are welcome.
 
-Le repo fournit un `Dockerfile` (build Next.js *standalone*, image Debian slim
-non-root, healthcheck) et un `compose.yaml` prêt pour [Komodo](https://komo.do).
+## Project structure
 
-**Komodo** — crée une **Stack** pointant sur ce repo (fichier `compose.yaml`),
-puis renseigne l'**Environment** de la Stack :
-
-```env
-TIERLISTRR_PORT=3000
-GROQ_API_KEY=gsk_xxx        # optionnel (active la génération IA)
-# GROQ_MODEL=llama-3.3-70b-versatile
+```
+src/
+  app/                 # routes (home, /t/[slug], API routes)
+  components/          # UI + board + auth components
+  db/                  # Drizzle schema + libSQL client (idempotent schema init)
+  lib/                 # data access, server actions, AI, image queue
+  i18n/                # next-intl config, request, locale switch action
+messages/              # translation catalogs (one JSON per locale)
 ```
 
-Komodo build l'image et lance le conteneur. Le volume nommé `tierlistrr-data`
-(monté sur `/data`) persiste la base SQLite **et** les images uploadées.
+## Contributing
 
-**Docker Compose** (manuel) :
+Issues and pull requests are welcome — new languages, features, or fixes.
 
-```bash
-GROQ_API_KEY=gsk_xxx docker compose up -d --build
-```
+## License
 
-## Modèle de données
-
-- **user / session / account / verification** — comptes (better-auth, OTP email)
-- **tierlists** — `id`, `slug`, `title`, `description`, `ownerId`, timestamps
-  *(toujours publiques)*
-- **tiers** — `id`, `tierlistId`, `label`, `color`, `position` *(définition partagée)*
-- **items** — `id`, `tierlistId`, `name`, `imagePath`, `imageStatus`, `position`
-  *(éléments partagés)*
-- **placements** — `id`, `tierlistId`, `userId`, `itemId`, `tierId` *(null = pool)*,
-  `position` — le **classement par participant** (une ligne par utilisateur × élément)
-
-Une liste est un **sujet partagé** : le **créateur** gère les éléments et les tiers
-(5 par défaut : S, A, B, C, D) ; chaque **participant connecté** a son **propre
-classement**. **Sans compte = lecture seule** (on peut voir le classement de chaque
-participant via le sélecteur, et partager le lien).
-
-## Design system « marathon »
-
-L'identité visuelle suit le design system *marathon* : palette chaleureuse et
-éditoriale — fond papier `#f7f5f0`, encre `#1a1614`, accent terracotta `#d85b3d`,
-vert sauge `#6b8e65` —, titres et chiffres en serif (Georgia), libellés en
-capitales trackées (Arial). Tous les tokens sont centralisés dans
-[`src/app/globals.css`](src/app/globals.css) (`@theme`), ce qui permet de re-skinner
-en une passe.
-
-> Le projet source vit dans Claude Design. Pour resynchroniser les composants, on
-> utilise le MCP `claude_design` depuis le CLI desktop (`/design-login` requis,
-> indisponible en session web).
-
-## Feuille de route
-
-- [x] **Base** — création / visualisation / édition de tier lists, drag & drop, photos
-- [x] **IA** — bouton « Générer » : Groq propose les éléments du thème, Pollinations
-  génère les images, le tout atterrit dans « à classer »
-- [x] **Images IA sur disque** — téléchargées et persistées (concurrence limitée
-  + retries), plus de hotlink ni de 429 à l'affichage
-- [x] **Comptes + multi-utilisateurs** — connexion OTP email, nom modifiable,
-  listes publiques, classement par participant, sélecteur de participant,
-  partage par lien, lecture seule sans compte
-- [x] **Classement moyen (leaderboard)** — vue « Moyenne » qui agrège les
-  classements de tous les participants (rang moyen de chaque élément)
-- [ ] Réordonnancement des tiers par glisser-déposer
-- [ ] Export image de la tier list
-
-## Licence
-
-Open source. Remake inspiré d'OpenTierBoy.
+[MIT](./LICENSE) © Nathan Mercier

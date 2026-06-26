@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { updateTier, deleteTier } from "@/lib/actions";
 import { Modal } from "@/components/ui/Modal";
@@ -21,6 +22,8 @@ export function EditTierModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useTranslations("editTier");
+  const tc = useTranslations("common");
   const [label, setLabel] = useState(tier.label);
   const [color, setColor] = useState(tier.color);
   const [pending, start] = useTransition();
@@ -34,7 +37,7 @@ export function EditTierModal({
   }
 
   function remove() {
-    if (!confirm("Supprimer ce tier ? Ses éléments retournent dans « à classer ».")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     start(async () => {
       await deleteTier(tier.id);
       onSaved();
@@ -43,10 +46,10 @@ export function EditTierModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Modifier le tier">
+    <Modal open={open} onClose={onClose} title={t("title")}>
       <div className="space-y-5">
         <div>
-          <Label htmlFor="tier-label">Libellé</Label>
+          <Label htmlFor="tier-label">{t("labelLabel")}</Label>
           <Input
             id="tier-label"
             value={label}
@@ -56,7 +59,7 @@ export function EditTierModal({
           />
         </div>
         <div>
-          <Label>Couleur</Label>
+          <Label>{t("colorLabel")}</Label>
           <div className="flex flex-wrap gap-2">
             {TIER_COLORS.map((c) => (
               <button
@@ -78,14 +81,14 @@ export function EditTierModal({
         <div className="flex items-center justify-between pt-1">
           <Button type="button" variant="danger" onClick={remove} disabled={pending}>
             <Trash2 size={15} />
-            Supprimer
+            {tc("delete")}
           </Button>
           <div className="flex gap-2">
             <Button type="button" variant="ghost" onClick={onClose}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="button" onClick={save} disabled={pending || !label.trim()}>
-              {pending ? "…" : "Enregistrer"}
+              {pending ? "…" : tc("save")}
             </Button>
           </div>
         </div>

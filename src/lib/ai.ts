@@ -123,9 +123,7 @@ async function groqChat(
 ): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error(
-      "L'IA n'est pas configurée. Ajoute une variable d'environnement GROQ_API_KEY.",
-    );
+    throw new Error("AI is not configured (missing GROQ_API_KEY).");
   }
   const baseUrl = process.env.GROQ_BASE_URL || DEFAULT_BASE_URL;
   const model = process.env.GROQ_MODEL || DEFAULT_MODEL;
@@ -149,9 +147,7 @@ async function groqChat(
     });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
-      throw new Error(
-        `Échec de l'appel à l'IA (${res.status}). ${detail.slice(0, 200)}`,
-      );
+      throw new Error(`AI call failed (${res.status}). ${detail.slice(0, 200)}`);
     }
     const json = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
@@ -183,7 +179,7 @@ export async function generateItemNames(
   );
   const names = parseItemNames(content, count);
   if (names.length === 0) {
-    throw new Error("L'IA n'a renvoyé aucun élément exploitable.");
+    throw new Error("The AI returned no usable items.");
   }
   return names;
 }

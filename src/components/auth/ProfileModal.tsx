@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { authClient } from "@/lib/auth-client";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +19,8 @@ export function ProfileModal({
   initialName: string;
   email: string;
 }) {
+  const t = useTranslations("profile");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [name, setName] = useState(initialName);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +32,7 @@ export function ProfileModal({
     start(async () => {
       const { error } = await authClient.updateUser({ name: name.trim() });
       if (error) {
-        setError(error.message ?? "Échec de la mise à jour.");
+        setError(error.message ?? t("errorUpdate"));
         return;
       }
       onClose();
@@ -38,31 +41,27 @@ export function ProfileModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Ton profil">
+    <Modal open={open} onClose={onClose} title={t("title")}>
       <form onSubmit={save} className="space-y-4">
-        <p className="text-sm text-ink-soft">
-          Connecté en tant que <strong>{email}</strong>.
-        </p>
+        <p className="text-sm text-ink-soft">{t("loggedInAs", { email })}</p>
         <div>
-          <Label htmlFor="profile-name">Nom affiché</Label>
+          <Label htmlFor="profile-name">{t("nameLabel")}</Label>
           <Input
             id="profile-name"
             value={name}
             autoFocus
-            placeholder="ex. Nathan"
+            placeholder={t("namePlaceholder")}
             onChange={(e) => setName(e.target.value)}
           />
-          <p className="mt-1.5 text-[11px] text-muted">
-            C&apos;est ce nom qui apparaît sur tes classements et tes listes.
-          </p>
+          <p className="mt-1.5 text-[11px] text-muted">{t("nameHint")}</p>
         </div>
         {error ? <p className="text-sm text-terracotta">{error}</p> : null}
         <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="ghost" onClick={onClose}>
-            Annuler
+            {tc("cancel")}
           </Button>
           <Button type="submit" disabled={pending || !name.trim()}>
-            {pending ? "…" : "Enregistrer"}
+            {pending ? "…" : tc("save")}
           </Button>
         </div>
       </form>

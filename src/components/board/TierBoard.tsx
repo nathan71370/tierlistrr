@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   DragDropContext,
   Draggable,
@@ -67,6 +68,9 @@ export function TierBoard({
   consensusAvailable: boolean;
   aiEnabled: boolean;
 }) {
+  const t = useTranslations("board");
+  const tc = useTranslations("common");
+  const th = useTranslations("header");
   const router = useRouter();
   const [tiers, setTiers] = useState<Tier[]>(initialTiers);
   const [groups, setGroups] = useState<Groups>(() =>
@@ -160,7 +164,7 @@ export function TierBoard({
       {/* Header */}
       <div className="mb-5">
         <Link href="/" className={cn(buttonClasses("secondary", "sm"))}>
-          <ArrowLeft size={15} /> Toutes les listes
+          <ArrowLeft size={15} /> {t("backToLists")}
         </Link>
         <div className="mt-4 flex flex-col gap-5 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
@@ -178,32 +182,32 @@ export function TierBoard({
             {pendingImages > 0 ? (
               <span className="kicker inline-flex items-center gap-1.5 text-terracotta">
                 <Loader2 size={12} className="animate-spin" />
-                {pendingImages} image{pendingImages > 1 ? "s" : ""}
+                {t("imagesGenerating", { count: pendingImages })}
               </span>
             ) : saving ? (
               <span className="kicker inline-flex items-center gap-1.5">
-                <Loader2 size={12} className="animate-spin" /> Enregistrement
+                <Loader2 size={12} className="animate-spin" /> {tc("saving")}
               </span>
             ) : null}
             <Button variant="secondary" size="sm" onClick={share}>
               {copied ? <Check size={15} /> : <Share2 size={15} />}
-              {copied ? "Copié !" : "Partager"}
+              {copied ? t("copied") : t("share")}
             </Button>
             {isOwner ? (
               <>
                 <Button variant="secondary" size="sm" onClick={() => setSettingsOpen(true)}>
                   <Settings2 size={15} />
-                  Réglages
+                  {t("settings")}
                 </Button>
                 {aiEnabled ? (
                   <Button variant="secondary" size="sm" onClick={() => setGenOpen(true)}>
                     <Sparkles size={15} />
-                    Générer
+                    {t("generate")}
                   </Button>
                 ) : null}
                 <Button size="sm" onClick={() => setAddOpen(true)}>
                   <Plus size={16} />
-                  Ajouter
+                  {t("add")}
                 </Button>
               </>
             ) : null}
@@ -214,7 +218,7 @@ export function TierBoard({
       {/* Participant selector */}
       {participants.length > 0 || consensusAvailable ? (
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="kicker mr-1">Classement de</span>
+          <span className="kicker mr-1">{t("rankingOf")}</span>
           {consensusAvailable ? (
             <button
               onClick={() => selectParticipant(CONSENSUS_ID)}
@@ -225,7 +229,7 @@ export function TierBoard({
                   : "border-terracotta/40 bg-surface text-terracotta hover:bg-terracotta/10",
               )}
             >
-              <Trophy size={13} /> Moyenne
+              <Trophy size={13} /> {t("average")}
             </button>
           ) : null}
           {participants.map((p) => (
@@ -239,8 +243,8 @@ export function TierBoard({
                   : "border-line bg-surface text-ink-soft hover:border-ink/30",
               )}
             >
-              {p.isYou ? "Toi" : p.label}
-              {p.isOwner ? <span className="opacity-60">· créateur</span> : null}
+              {p.isYou ? t("you") : p.label}
+              {p.isOwner ? <span className="opacity-60">· {t("creatorTag")}</span> : null}
             </button>
           ))}
         </div>
@@ -252,30 +256,32 @@ export function TierBoard({
           <span className="inline-flex items-center gap-2 text-sm text-ink-soft">
             {isConsensus ? (
               <>
-                <Trophy size={15} className="text-terracotta" /> Classement{" "}
-                <strong>moyen</strong> de tous les participants — lecture seule.
+                <Trophy size={15} className="text-terracotta" />{" "}
+                {t.rich("readOnlyConsensus", { b: (c) => <strong>{c}</strong> })}
               </>
             ) : (
               <>
-                <Eye size={15} /> Tu regardes le classement de{" "}
-                <strong>{viewedLabel ?? "ce participant"}</strong> — lecture seule.
+                <Eye size={15} />{" "}
+                {t.rich("readOnlyUser", {
+                  name: viewedLabel ?? t("readOnlyUserFallback"),
+                  b: (c) => <strong>{c}</strong>,
+                })}
               </>
             )}
           </span>
           {currentUserId ? (
             <Button size="sm" onClick={() => selectParticipant(currentUserId)}>
-              Faire mon classement
+              {t("makeMine")}
             </Button>
           ) : null}
         </div>
       ) : (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-md)] border border-line bg-cream-deep px-4 py-3">
           <span className="inline-flex items-center gap-2 text-sm text-ink-soft">
-            <Eye size={15} /> Lecture seule. Connecte-toi pour faire ton propre
-            classement.
+            <Eye size={15} /> {t("readOnlySignedOut")}
           </span>
           <Button size="sm" onClick={() => setSignInOpen(true)}>
-            <LogIn size={15} /> Se connecter
+            <LogIn size={15} /> {th("signIn")}
           </Button>
         </div>
       )}
@@ -292,7 +298,7 @@ export function TierBoard({
                   isOwner ? "hover:brightness-105" : "cursor-default",
                 )}
                 style={{ backgroundColor: tier.color }}
-                title={isOwner ? "Modifier ce tier" : undefined}
+                title={isOwner ? t("editTierTitle") : undefined}
               >
                 <span className="display break-words text-3xl leading-none text-white drop-shadow-sm">
                   {tier.label}
@@ -339,7 +345,7 @@ export function TierBoard({
               }
             >
               <Plus size={14} />
-              Ajouter un tier
+              {t("addTier")}
             </Button>
           </div>
         ) : null}
@@ -347,8 +353,10 @@ export function TierBoard({
         {/* Pool */}
         <div className="mt-9">
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="kicker">À classer</h2>
-            <span className="text-[11px] text-muted">{pool.length} en attente</span>
+            <h2 className="kicker">{t("toRank")}</h2>
+            <span className="text-[11px] text-muted">
+              {t("waiting", { count: pool.length })}
+            </span>
           </div>
           <Droppable droppableId={POOL_ID} direction="horizontal" isDropDisabled={!canEdit}>
             {(provided, snapshot) => (
@@ -365,9 +373,7 @@ export function TierBoard({
                 {pool.length === 0 && !snapshot.isDraggingOver ? (
                   <div className="flex w-full items-center justify-center py-6 text-center">
                     <span className="text-sm text-muted">
-                      {canEdit
-                        ? "Tout est classé — beau travail."
-                        : "Aucun élément à classer."}
+                      {canEdit ? t("allRanked") : t("noItems")}
                     </span>
                   </div>
                 ) : null}

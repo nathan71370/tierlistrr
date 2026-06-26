@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Sparkles, Loader2 } from "lucide-react";
 import { generateItems } from "@/lib/actions";
 import { Modal } from "@/components/ui/Modal";
@@ -23,6 +24,8 @@ export function GenerateItemsModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const t = useTranslations("generate");
+  const tc = useTranslations("common");
   const [topic, setTopic] = useState(defaultTopic);
   const [count, setCount] = useState(12);
   const [error, setError] = useState<string | null>(null);
@@ -35,34 +38,32 @@ export function GenerateItemsModal({
         await generateItems(tierlistId, topic, count);
         onSaved();
         onClose();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "La génération a échoué.");
+      } catch {
+        setError(t("error"));
       }
     });
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Générer avec l'IA">
+    <Modal open={open} onClose={onClose} title={t("title")}>
       <div className="space-y-5">
         <p className="text-sm leading-relaxed text-ink-soft">
-          L&apos;IA propose une liste d&apos;éléments pour ton thème. Ils
-          arrivent <strong>tout de suite</strong> dans « à classer » (tu peux
-          déjà les ranger), et leurs images se génèrent ensuite en arrière-plan.
+          {t.rich("intro", { b: (c) => <strong>{c}</strong> })}
         </p>
 
         <div>
-          <Label htmlFor="ai-topic">Thème</Label>
+          <Label htmlFor="ai-topic">{t("topicLabel")}</Label>
           <Input
             id="ai-topic"
             value={topic}
             autoFocus
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="ex. Cocktails de l'été, Fromages français…"
+            placeholder={t("topicPlaceholder")}
           />
         </div>
 
         <div>
-          <Label>Nombre d&apos;éléments</Label>
+          <Label>{t("countLabel")}</Label>
           <div className="flex gap-2">
             {COUNTS.map((c) => (
               <button
@@ -89,19 +90,19 @@ export function GenerateItemsModal({
         ) : null}
 
         <div className="flex items-center justify-between pt-1">
-          <span className="text-[11px] text-muted">Images en arrière-plan · Pollinations</span>
+          <span className="text-[11px] text-muted">{t("note")}</span>
           <div className="flex gap-2">
             <Button type="button" variant="ghost" onClick={onClose} disabled={pending}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="button" onClick={run} disabled={pending || !topic.trim()}>
               {pending ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" /> Génération…
+                  <Loader2 size={16} className="animate-spin" /> {t("generating")}
                 </>
               ) : (
                 <>
-                  <Sparkles size={16} /> Générer
+                  <Sparkles size={16} /> {t("generate")}
                 </>
               )}
             </Button>

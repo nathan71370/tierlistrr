@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { MailCheck } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Modal } from "@/components/ui/Modal";
@@ -15,6 +16,8 @@ export function SignInModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations("auth");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -38,7 +41,7 @@ export function SignInModal({
         type: "sign-in",
       });
       if (error) {
-        setError(error.message ?? "Échec de l'envoi du code.");
+        setError(error.message ?? t("errorSend"));
         return;
       }
       setStep("code");
@@ -54,7 +57,7 @@ export function SignInModal({
         otp: code.trim(),
       });
       if (error) {
-        setError(error.message ?? "Code invalide ou expiré.");
+        setError(error.message ?? t("errorVerify"));
         return;
       }
       close();
@@ -63,32 +66,29 @@ export function SignInModal({
   }
 
   return (
-    <Modal open={open} onClose={close} title="Connexion">
+    <Modal open={open} onClose={close} title={t("title")}>
       {step === "email" ? (
         <form onSubmit={sendCode} className="space-y-4">
-          <p className="text-sm leading-relaxed text-ink-soft">
-            Entre ton email : on t&apos;envoie un code à 6 chiffres. Pas de mot de
-            passe, et ça crée ton compte si tu n&apos;en as pas encore.
-          </p>
+          <p className="text-sm leading-relaxed text-ink-soft">{t("emailIntro")}</p>
           <div>
-            <Label htmlFor="signin-email">Email</Label>
+            <Label htmlFor="signin-email">{t("emailLabel")}</Label>
             <Input
               id="signin-email"
               type="email"
               value={email}
               autoFocus
               required
-              placeholder="toi@exemple.com"
+              placeholder={t("emailPlaceholder")}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           {error ? <p className="text-sm text-terracotta">{error}</p> : null}
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={close}>
-              Annuler
+              {tc("cancel")}
             </Button>
             <Button type="submit" disabled={pending || !email.trim()}>
-              {pending ? "Envoi…" : "Recevoir le code"}
+              {pending ? t("sending") : t("sendCode")}
             </Button>
           </div>
         </form>
@@ -96,10 +96,10 @@ export function SignInModal({
         <form onSubmit={verify} className="space-y-4">
           <p className="flex items-center gap-2 text-sm text-ink-soft">
             <MailCheck size={16} className="text-sage" />
-            Code envoyé à <strong>{email}</strong>.
+            {t("codeSentTo", { email })}
           </p>
           <div>
-            <Label htmlFor="signin-code">Code à 6 chiffres</Label>
+            <Label htmlFor="signin-code">{t("codeLabel")}</Label>
             <Input
               id="signin-code"
               inputMode="numeric"
@@ -123,10 +123,10 @@ export function SignInModal({
                 setError(null);
               }}
             >
-              ← Changer d&apos;email
+              {t("changeEmail")}
             </button>
             <Button type="submit" disabled={pending || code.length < 6}>
-              {pending ? "Vérification…" : "Se connecter"}
+              {pending ? t("verifying") : t("verify")}
             </Button>
           </div>
         </form>
