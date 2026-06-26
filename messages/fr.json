@@ -51,7 +51,8 @@
     "verify": "Se connecter",
     "verifying": "Vérification…",
     "errorSend": "Échec de l'envoi du code.",
-    "errorVerify": "Code invalide ou expiré."
+    "errorVerify": "Code invalide ou expiré.",
+    "errorNotAllowed": "Cet email n'est pas autorisé à se connecter."
   },
   "profile": {
     "title": "Ton profil",

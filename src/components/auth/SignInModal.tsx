@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { MailCheck } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { checkEmailAllowed } from "@/lib/auth-actions";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Label, Input } from "@/components/ui/Field";
@@ -36,12 +37,16 @@ export function SignInModal({
     e.preventDefault();
     setError(null);
     start(async () => {
+      if (!(await checkEmailAllowed(email.trim()))) {
+        setError(t("errorNotAllowed"));
+        return;
+      }
       const { error } = await authClient.emailOtp.sendVerificationOtp({
         email: email.trim(),
         type: "sign-in",
       });
       if (error) {
-        setError(error.message ?? t("errorSend"));
+        setError(error.status === 403 ? t("errorNotAllowed") : t("errorSend"));
         return;
       }
       setStep("code");
@@ -57,7 +62,7 @@ export function SignInModal({
         otp: code.trim(),
       });
       if (error) {
-        setError(error.message ?? t("errorVerify"));
+        setError(error.status === 403 ? t("errorNotAllowed") : t("errorVerify"));
         return;
       }
       close();

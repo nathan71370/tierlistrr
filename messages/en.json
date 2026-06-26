@@ -51,7 +51,8 @@
     "verify": "Sign in",
     "verifying": "Verifying…",
     "errorSend": "Couldn't send the code.",
-    "errorVerify": "Invalid or expired code."
+    "errorVerify": "Invalid or expired code.",
+    "errorNotAllowed": "This email isn't authorized to sign in."
   },
   "profile": {
     "title": "Your profile",

@@ -58,6 +58,7 @@ what you need — everything is optional except `BETTER_AUTH_SECRET` in producti
 | --- | --- | --- |
 | `BETTER_AUTH_SECRET` | **Required in production** — random secret (`openssl rand -base64 32`) | — |
 | `BETTER_AUTH_URL` | Public app URL (cookies / CSRF) | inferred from request |
+| `AUTH_ALLOWED_EMAILS` | Sign-in allowlist — emails and/or `@domains`, comma-separated. Empty = open | — |
 | `DATA_DIR` | Directory for the SQLite database **and** uploaded images | `./data` |
 | `DATABASE_URL` | Explicit libSQL URL (e.g. `file:/var/lib/tierlistrr/app.db`) | derived from `DATA_DIR` |
 | `PORT` | HTTP port | `3000` |
@@ -80,6 +81,11 @@ real emails, configure SMTP. With Gmail / Google Workspace, use
 [App Password](https://myaccount.google.com/apppasswords) as `SMTP_PASS`
 (the regular account password won't work). Without SMTP, codes are logged to the
 container output.
+
+To make the app **invite-only**, set `AUTH_ALLOWED_EMAILS` to a comma-separated
+list of allowed addresses and/or domains (e.g.
+`alice@example.com, @yourteam.com`). Anyone not on the list can't request a code
+or create an account. Leave it empty for an open instance.
 
 ### AI images (optional)
 
