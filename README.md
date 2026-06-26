@@ -70,6 +70,7 @@ what you need — everything is optional except `BETTER_AUTH_SECRET` in producti
 | `POLLINATIONS_TOKEN` | Pollinations secret key `sk_…` (higher image rate limits, server-side) | — |
 | `POLLINATIONS_BASE_URL` | Image service base URL | `https://image.pollinations.ai` |
 | `IMAGE_CONCURRENCY` | Parallel background image downloads | `2` |
+| `TIERLISTRR_HOST` | Public hostname used by the Traefik router rule in `compose.yaml` | `tierlistrr.example.com` |
 
 ### Authentication & email
 
@@ -97,9 +98,13 @@ it holds the SQLite database and uploaded images.
 BETTER_AUTH_SECRET=$(openssl rand -base64 32) docker compose up -d --build
 ```
 
-The provided `compose.yaml` is also ready for [Komodo](https://komo.do) and
-includes [Traefik](https://traefik.io) labels — adjust the host rule to your
-domain, and set secrets in your platform's environment.
+The provided `compose.yaml` is ready for [Komodo](https://komo.do) and includes
+[Traefik](https://traefik.io) labels. **Nothing domain-specific is hardcoded** —
+the router host comes from `TIERLISTRR_HOST` and all secrets from the
+environment, so you can deploy straight from a git-linked stack without editing
+the file. Set at least `BETTER_AUTH_SECRET`, `TIERLISTRR_HOST` and
+`BETTER_AUTH_URL` in your platform's environment. Not using Traefik? Comment out
+the `networks`/`labels` and uncomment the `ports` mapping.
 
 ## Internationalization
 

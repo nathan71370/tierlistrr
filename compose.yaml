@@ -1,8 +1,15 @@
-# Komodo / Docker Compose stack for tierlistrr.
+# Docker Compose stack for tierlistrr.
 #
-# Env vars (Komodo Environment tab):
-#   GROQ_API_KEY=gsk_xxx
-#   GROQ_MODEL=llama-3.3-70b-versatile   (optionnel)
+# Domain / secrets are NOT hardcoded here — set them in your platform's
+# environment (or a .env file next to this compose). Minimum to set:
+#   BETTER_AUTH_SECRET   (required, random string)
+#   TIERLISTRR_HOST      (your public hostname, for the Traefik router rule)
+#   BETTER_AUTH_URL      (your public URL, e.g. https://$TIERLISTRR_HOST)
+# Optional: SMTP_* (email OTP), GROQ_API_KEY / POLLINATIONS_TOKEN (AI).
+#
+# The Traefik labels assume an external "traefik" network and TLS via the
+# "websecure" entrypoint. Remove them and uncomment `ports` below if you don't
+# use Traefik.
 services:
   tierlistrr:
     container_name: tierlistrr
@@ -19,20 +26,23 @@ services:
       POLLINATIONS_TOKEN: "${POLLINATIONS_TOKEN:-}"
       # Auth (better-auth). BETTER_AUTH_SECRET is REQUIRED in prod (random string).
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:-}"
-      BETTER_AUTH_URL: "${BETTER_AUTH_URL:-https://tierlistrr.example.com}"
-      # Email OTP delivery (Gmail Workspace: smtp.gmail.com + app password).
+      BETTER_AUTH_URL: "${BETTER_AUTH_URL:-}"
+      # Email OTP delivery (e.g. Gmail: smtp.gmail.com + app password).
       SMTP_HOST: "${SMTP_HOST:-}"
       SMTP_PORT: "${SMTP_PORT:-587}"
       SMTP_USER: "${SMTP_USER:-}"
       SMTP_PASS: "${SMTP_PASS:-}"
-      SMTP_FROM: "${SMTP_FROM:-tierlistrr <you@example.com>}"
+      SMTP_FROM: "${SMTP_FROM:-}"
     volumes:
       - tierlistrr-data:/data
+    # Not using Traefik? Comment out `networks`/`labels` and expose a port:
+    # ports:
+    #   - "${TIERLISTRR_PORT:-3000}:3000"
     networks:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.tierlistrr.rule=Host(`tierlistrr.example.com`)"
+      - "traefik.http.routers.tierlistrr.rule=Host(`${TIERLISTRR_HOST:-tierlistrr.example.com}`)"
       - "traefik.http.routers.tierlistrr.entrypoints=websecure"
       - "traefik.http.routers.tierlistrr.tls=true"
       - "traefik.http.services.tierlistrr.loadbalancer.server.port=3000"
