@@ -45,6 +45,10 @@ export function pollinationsUrlForPrompt(
     model,
     nologo: "true",
   });
+  // Pollinations auth: ?key=<sk_...> (also sent as a Bearer header in
+  // downloadImage). Only used for the server-side fetch; never stored.
+  const key = process.env.POLLINATIONS_TOKEN;
+  if (key) params.set("key", key);
   return `${base}/prompt/${encodeURIComponent(prompt)}?${params}`;
 }
 

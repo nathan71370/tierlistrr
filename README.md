@@ -49,7 +49,7 @@ Variables d'environnement :
 | `GROQ_MODEL`    | Modèle LLM utilisé                                            | `llama-3.3-70b-versatile` |
 | `GROQ_BASE_URL` | Endpoint compatible OpenAI (pour pointer ailleurs que Groq)  | `https://api.groq.com/openai/v1` |
 | `POLLINATIONS_BASE_URL` | Base du service d'images (pour self-host/proxy)     | `https://image.pollinations.ai` |
-| `POLLINATIONS_TOKEN` | Token gratuit (auth.pollinations.ai) : limites plus hautes, pas de file | — |
+| `POLLINATIONS_TOKEN` | Clé secrète Pollinations **`sk_…`** (auth.pollinations.ai, usage serveur, sans limite de débit) | — |
 | `IMAGE_CONCURRENCY` | Nb d'images générées en parallèle en arrière-plan       | `2` |
 | `BETTER_AUTH_SECRET` | **Requis en prod** : secret aléatoire (`openssl rand -base64 32`) | — |
 | `BETTER_AUTH_URL` | URL publique de l'app (pour les cookies/CSRF)             | déduit de la requête |
