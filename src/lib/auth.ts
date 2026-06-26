@@ -12,9 +12,19 @@ if (process.env.NODE_ENV === "production" && !process.env.BETTER_AUTH_SECRET) {
   );
 }
 
+// Extra trusted origins (CSRF). better-auth already trusts BETTER_AUTH_URL;
+// add more here (e.g. apex + www, multiple domains) via a comma-separated list.
+const extraTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || "dev-insecure-secret-change-me",
   baseURL: process.env.BETTER_AUTH_URL || undefined,
+  ...(extraTrustedOrigins.length
+    ? { trustedOrigins: extraTrustedOrigins }
+    : {}),
   database: drizzleAdapter(db, { provider: "sqlite" }),
   emailAndPassword: { enabled: false },
   databaseHooks: {

@@ -26,7 +26,11 @@ services:
       POLLINATIONS_TOKEN: "${POLLINATIONS_TOKEN:-}"
       # Auth (better-auth). BETTER_AUTH_SECRET is REQUIRED in prod (random string).
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:-}"
-      BETTER_AUTH_URL: "${BETTER_AUTH_URL:-}"
+      # Public URL — must match the browser origin (CSRF). Auto-derived from
+      # TIERLISTRR_HOST; override BETTER_AUTH_URL if your scheme/host differ.
+      BETTER_AUTH_URL: "${BETTER_AUTH_URL:-https://${TIERLISTRR_HOST}}"
+      # Optional extra trusted origins, comma-separated (e.g. apex + www).
+      BETTER_AUTH_TRUSTED_ORIGINS: "${BETTER_AUTH_TRUSTED_ORIGINS:-}"
       # Optional sign-in allowlist (emails and/or @domains, comma-separated).
       # Empty = open to everyone.
       AUTH_ALLOWED_EMAILS: "${AUTH_ALLOWED_EMAILS:-}"
