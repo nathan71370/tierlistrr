@@ -18,7 +18,7 @@ jobs:
       # Build-time placeholder; the real secret is provided at runtime.
       BETTER_AUTH_SECRET: "ci-build-placeholder"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
