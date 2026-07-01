@@ -8,7 +8,15 @@ participant's ranking, and see the aggregated **average leaderboard**.
 
 Self-hostable, no third-party account required, a single SQLite file for storage.
 
-<!-- Add screenshots here -->
+**[🔗 Live demo](https://tierlistrr.limperiam.com)** · [MIT License](./LICENSE) · PRs welcome
+
+<a href="https://www.buymeacoffee.com/AzRoDoRzA" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="45"></a>
+
+## Screenshots
+
+|  |  |
+| --- | --- |
+| ![Home — browse all tier lists](docs/screenshots/home.png) | ![Board — a shared cheese tier list, ranked per participant](docs/screenshots/board.png) |
 
 ## Features
 
@@ -145,7 +153,14 @@ messages/              # translation catalogs (one JSON per locale)
 
 ## Contributing
 
-Issues and pull requests are welcome — new languages, features, or fixes.
+Issues and pull requests are welcome — new languages, features, or fixes. If you
+find this useful, a ⭐ on the repo helps a lot.
+
+## Support
+
+If tierlistrr saves you time, you can support development:
+
+<a href="https://www.buymeacoffee.com/AzRoDoRzA" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="45"></a>
 
 ## License
 
