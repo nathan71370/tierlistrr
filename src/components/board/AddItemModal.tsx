@@ -135,7 +135,12 @@ export function AddItemModal({
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  setPreview(f ? URL.createObjectURL(f) : null);
+                  setPreview((prev) => {
+                    if (prev) URL.revokeObjectURL(prev);
+                    return f && f.type.startsWith("image/")
+                      ? URL.createObjectURL(f)
+                      : null;
+                  });
                 }}
               />
             </label>
