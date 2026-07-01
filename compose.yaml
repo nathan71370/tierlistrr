@@ -13,10 +13,13 @@
 services:
   tierlistrr:
     container_name: tierlistrr
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: tierlistrr:latest
+    # Use the prebuilt image from GitHub Container Registry (recommended):
+    image: ghcr.io/nathan71370/tierlistrr:latest
+    # ...or build locally instead: comment out `image` above, uncomment `build`,
+    # and run `docker compose up -d --build`.
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       DATA_DIR: /data

@@ -8,6 +8,10 @@ participant's ranking, and see the aggregated **average leaderboard**.
 
 Self-hostable, no third-party account required, a single SQLite file for storage.
 
+[![CI](https://github.com/nathan71370/tierlistrr/actions/workflows/ci.yml/badge.svg)](https://github.com/nathan71370/tierlistrr/actions/workflows/ci.yml)
+[![Publish Docker image](https://github.com/nathan71370/tierlistrr/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/nathan71370/tierlistrr/actions/workflows/docker-publish.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+
 **[🔗 Live demo](https://tierlistrr.limperiam.com)** · [MIT License](./LICENSE) · PRs welcome
 
 <a href="https://www.buymeacoffee.com/AzRoDoRzA" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="45"></a>
@@ -21,6 +25,8 @@ Self-hostable, no third-party account required, a single SQLite file for storage
 |  |  |
 | --- | --- |
 | ![Home — browse all tier lists](docs/screenshots/home.png) | ![Board — a shared cheese tier list, ranked per participant](docs/screenshots/board.png) |
+
+See the [**walkthrough**](docs/walkthrough.md) for how it all fits together.
 
 ## Features
 
@@ -117,6 +123,30 @@ background. No key → the feature is simply hidden and the app works normally.
 The repo ships a multi-stage `Dockerfile` (Next.js standalone, non-root) and a
 `compose.yaml`. Persist the named volume `tierlistrr-data` (mounted at `/data`) —
 it holds the SQLite database and uploaded images.
+
+### Prebuilt image (recommended)
+
+A multi-stage image is published to the GitHub Container Registry on every push
+to `main` and every `v*` tag:
+
+```bash
+docker pull ghcr.io/nathan71370/tierlistrr:latest
+```
+
+The provided `compose.yaml` already references it, so you can start without a
+local build:
+
+```bash
+BETTER_AUTH_SECRET=$(openssl rand -base64 32) docker compose up -d
+```
+
+Tags: `latest` (main), `sha-<short>` (per commit), and `x.y` / `x.y.z` for
+version tags.
+
+### Build it yourself
+
+Prefer building from source? Flip the `image`/`build` lines in `compose.yaml`
+(see the comment there) and run:
 
 ```bash
 BETTER_AUTH_SECRET=$(openssl rand -base64 32) docker compose up -d --build
