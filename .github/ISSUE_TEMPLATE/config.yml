@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🔗 Live demo
+    url: https://tierlistrr.limperiam.com
+    about: Try tierlistrr before filing an issue.
+  - name: 💬 Questions & discussion
+    url: https://github.com/nathan71370/tierlistrr/discussions
+    about: For usage questions and general discussion (enable Discussions in repo settings).

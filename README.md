@@ -12,6 +12,10 @@ Self-hostable, no third-party account required, a single SQLite file for storage
 
 <a href="https://www.buymeacoffee.com/AzRoDoRzA" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="45"></a>
 
+> 🌍 **Speak another language?** Adding one is the easiest way to contribute — no
+> code required, just a JSON file. See [_Add a language_](#internationalization)
+> below or open a [🌍 language issue](https://github.com/nathan71370/tierlistrr/issues/new?template=add_a_language.yml).
+
 ## Screenshots
 
 |  |  |

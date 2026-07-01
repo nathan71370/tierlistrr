@@ -1,0 +1,45 @@
+name: 🐛 Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a bug!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: how-running
+    attributes:
+      label: How are you running tierlistrr?
+      options:
+        - Local dev (npm run dev)
+        - Docker / Docker Compose
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: For deployment issues, please paste the container logs.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: The git commit or release you're on, if known.

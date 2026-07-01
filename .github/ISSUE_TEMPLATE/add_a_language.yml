@@ -1,0 +1,28 @@
+name: 🌍 Add a language
+description: Offer to translate the UI into a new language (a great first contribution!)
+labels: ["i18n", "good first issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Adding a language needs **no code** — just a new `messages/<code>.json`
+        file and two lines in `src/i18n/config.ts`. See
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#-add-a-language-great-first-contribution).
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: e.g. German (de), Spanish (es), Japanese (ja)
+    validations:
+      required: true
+  - type: checkboxes
+    id: intent
+    attributes:
+      label: What are you planning?
+      options:
+        - label: I'd like to submit this translation myself (I'll open a PR)
+        - label: I'm requesting this language but can't translate it
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
