@@ -10,6 +10,7 @@ Self-hostable, no third-party account required, a single SQLite file for storage
 
 [![CI](https://github.com/nathan71370/tierlistrr/actions/workflows/ci.yml/badge.svg)](https://github.com/nathan71370/tierlistrr/actions/workflows/ci.yml)
 [![Publish Docker image](https://github.com/nathan71370/tierlistrr/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/nathan71370/tierlistrr/actions/workflows/docker-publish.yml)
+[![Latest release](https://img.shields.io/github/v/release/nathan71370/tierlistrr?sort=semver)](https://github.com/nathan71370/tierlistrr/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 **[🔗 Live demo](https://tierlistrr.limperiam.com)** · [MIT License](./LICENSE) · PRs welcome
