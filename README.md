@@ -29,6 +29,22 @@ Self-hostable, no third-party account required, a single SQLite file for storage
 
 See the [**walkthrough**](docs/walkthrough.md) for how it all fits together.
 
+## Quick start (self-host)
+
+Run the prebuilt image — no clone, no build:
+
+```bash
+docker run -d --name tierlistrr -p 3000:3000 \
+  -e BETTER_AUTH_SECRET="$(openssl rand -base64 32)" \
+  -v tierlistrr-data:/data \
+  ghcr.io/nathan71370/tierlistrr:latest
+```
+
+Open <http://localhost:3000>. Sign-in codes are printed to the container logs
+until you configure SMTP, so you can log in right away. For a production setup
+(reverse proxy, email, AI), use the provided [`compose.yaml`](compose.yaml) —
+see [Self-hosting with Docker](#self-hosting-with-docker).
+
 ## Features
 
 - 🧱 **Tier lists** with custom tiers (label + color) and a drag-and-drop board
@@ -51,7 +67,7 @@ See the [**walkthrough**](docs/walkthrough.md) for how it all fits together.
 - [better-auth](https://better-auth.com) (email OTP) · [next-intl](https://next-intl.dev) (i18n)
 - AI (optional): [Groq](https://groq.com) (OpenAI-compatible LLM) + [Pollinations](https://pollinations.ai) (images)
 
-## Quick start (development)
+## Run from source (development)
 
 ```bash
 git clone https://github.com/nathan71370/tierlistrr.git
