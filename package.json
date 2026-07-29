@@ -11,15 +11,15 @@
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "@libsql/client": "^0.17.4",
-    "better-auth": "^1.6.23",
+    "better-auth": "^1.6.25",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
-    "lucide-react": "^1.22.0",
-    "next": "16.2.9",
-    "next-intl": "^4.13.1",
+    "lucide-react": "^1.27.0",
+    "next": "16.2.12",
+    "next-intl": "^4.13.4",
     "nodemailer": "^9.0.3",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
@@ -29,8 +29,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
-    "playwright": "^1.61.1",
+    "eslint-config-next": "16.2.12",
+    "playwright": "^1.62.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
