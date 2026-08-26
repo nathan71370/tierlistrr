@@ -301,11 +301,16 @@ export async function savePlacements(tierlistId: string, list: Placement[]) {
 // Tiers
 // ---------------------------------------------------------------------------
 
-export async function updateTier(id: string, label: string, color: string) {
+export async function updateTier(
+  id: string,
+  label: string,
+  color: string,
+  countsInAverage: boolean,
+) {
   await requireOwnerByTier(id);
   await db
     .update(tiers)
-    .set({ label: label.trim() || "?", color })
+    .set({ label: label.trim() || "?", color, countsInAverage })
     .where(eq(tiers.id, id));
 }
 

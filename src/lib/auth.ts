@@ -31,7 +31,7 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          if (!isEmailAllowed(user.email)) {
+          if (!(await isEmailAllowed(user.email))) {
             throw new APIError("FORBIDDEN", { message: "EMAIL_NOT_ALLOWED" });
           }
           return { data: user };
@@ -46,7 +46,7 @@ export const auth = betterAuth({
       async sendVerificationOTP({ email, otp }) {
         // Gate sign-in to the allowlist (if configured) — no code is sent
         // to addresses that aren't authorized.
-        if (!isEmailAllowed(email)) {
+        if (!(await isEmailAllowed(email))) {
           throw new APIError("FORBIDDEN", { message: "EMAIL_NOT_ALLOWED" });
         }
         await sendOtpEmail(email, otp);

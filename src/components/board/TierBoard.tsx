@@ -92,7 +92,7 @@ export function TierBoard({
     () =>
       JSON.stringify([
         viewedUserId,
-        initialTiers.map((t) => [t.id, t.label, t.color, t.position]),
+        initialTiers.map((t) => [t.id, t.label, t.color, t.position, t.countsInAverage]),
         initialItems.map((i) => [i.id, i.position, i.name, i.imagePath, i.imageStatus]),
         initialPlacements,
       ]),
@@ -300,8 +300,15 @@ export function TierBoard({
                 style={{ backgroundColor: tier.color }}
                 title={isOwner ? t("editTierTitle") : undefined}
               >
-                <span className="display break-words text-3xl leading-none text-white drop-shadow-sm">
-                  {tier.label}
+                <span className="flex flex-col items-center gap-1">
+                  <span className="display break-words text-3xl leading-none text-white drop-shadow-sm">
+                    {tier.label}
+                  </span>
+                  {tier.countsInAverage ? null : (
+                    <span className="text-[10px] font-semibold uppercase leading-tight tracking-wide text-white/75">
+                      {t("outOfAverage")}
+                    </span>
+                  )}
                 </span>
               </button>
               <Droppable droppableId={tier.id} direction="horizontal" isDropDisabled={!canEdit}>

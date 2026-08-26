@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS tiers (
   tierlist_id TEXT NOT NULL REFERENCES tierlists(id) ON DELETE CASCADE,
   label TEXT NOT NULL,
   color TEXT NOT NULL,
-  position INTEGER NOT NULL
+  position INTEGER NOT NULL,
+  counts_in_average INTEGER NOT NULL DEFAULT 1
 );
 CREATE TABLE IF NOT EXISTS items (
   id TEXT PRIMARY KEY,
@@ -123,6 +124,7 @@ declare global {
 const MIGRATIONS = [
   "ALTER TABLE items ADD COLUMN image_status TEXT NOT NULL DEFAULT 'ready'",
   "ALTER TABLE tierlists ADD COLUMN owner_id TEXT",
+  "ALTER TABLE tiers ADD COLUMN counts_in_average INTEGER NOT NULL DEFAULT 1",
 ];
 
 function init() {

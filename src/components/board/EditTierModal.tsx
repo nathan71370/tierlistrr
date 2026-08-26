@@ -26,11 +26,12 @@ export function EditTierModal({
   const tc = useTranslations("common");
   const [label, setLabel] = useState(tier.label);
   const [color, setColor] = useState(tier.color);
+  const [countsInAverage, setCountsInAverage] = useState(tier.countsInAverage);
   const [pending, start] = useTransition();
 
   function save() {
     start(async () => {
-      await updateTier(tier.id, label, color);
+      await updateTier(tier.id, label, color, countsInAverage);
       onSaved();
       onClose();
     });
@@ -77,6 +78,24 @@ export function EditTierModal({
               />
             ))}
           </div>
+        </div>
+        <div>
+          <label className="flex cursor-pointer items-start gap-2.5">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-terracotta"
+              checked={countsInAverage}
+              onChange={(e) => setCountsInAverage(e.target.checked)}
+            />
+            <span>
+              <span className="block text-sm font-semibold text-ink">
+                {t("countsInAverageLabel")}
+              </span>
+              <span className="block text-[13px] leading-snug text-ink-soft">
+                {t("countsInAverageHint")}
+              </span>
+            </span>
+          </label>
         </div>
         <div className="flex items-center justify-between pt-1">
           <Button type="button" variant="danger" onClick={remove} disabled={pending}>
