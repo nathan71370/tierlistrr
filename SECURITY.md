@@ -33,6 +33,8 @@ A few deployment notes that prevent the most common issues:
   (`openssl rand -base64 32`). The default is insecure and for local dev only.
 - **Set `BETTER_AUTH_URL`** to your public origin behind a reverse proxy, so
   cookies and CSRF checks work correctly.
-- Use `AUTH_ALLOWED_EMAILS` to restrict who can sign in if your instance isn't
-  meant to be open.
+- Use `WHITELIST_HOST_FILE` (a text file of allowed emails / `@domains`) to
+  restrict who can sign in if your instance isn't meant to be open. A path that
+  is set but unreadable — or a file with no entry — refuses every sign-in rather
+  than falling back to an open instance.
 - Keep the app updated — Dependabot and the published image track upstream fixes.

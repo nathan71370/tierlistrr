@@ -5,6 +5,7 @@
 #   BETTER_AUTH_SECRET   (required, random string)
 #   TIERLISTRR_HOST      (your public hostname, for the Traefik router rule)
 #   BETTER_AUTH_URL      (your public URL, e.g. https://$TIERLISTRR_HOST)
+#   WHITELIST_HOST_FILE  (absolute host path of the sign-in allowlist, optional)
 # Optional: SMTP_* (email OTP), GROQ_API_KEY / POLLINATIONS_TOKEN (AI).
 #
 # The Traefik labels assume an external "traefik" network and TLS via the
@@ -34,9 +35,9 @@ services:
       BETTER_AUTH_URL: "${BETTER_AUTH_URL:-https://${TIERLISTRR_HOST}}"
       # Optional extra trusted origins, comma-separated (e.g. apex + www).
       BETTER_AUTH_TRUSTED_ORIGINS: "${BETTER_AUTH_TRUSTED_ORIGINS:-}"
-      # Optional sign-in allowlist (emails and/or @domains, comma-separated).
-      # Empty = open to everyone.
-      AUTH_ALLOWED_EMAILS: "${AUTH_ALLOWED_EMAILS:-}"
+      # Optional sign-in allowlist. Only defined when WHITELIST_HOST_FILE is
+      # set below — an undefined WHITELIST_PATH means "open to everyone".
+      WHITELIST_PATH: "${WHITELIST_HOST_FILE:+/config/whitelist.txt}"
       # Email OTP delivery (e.g. Gmail: smtp.gmail.com + app password).
       SMTP_HOST: "${SMTP_HOST:-}"
       SMTP_PORT: "${SMTP_PORT:-587}"
@@ -45,6 +46,16 @@ services:
       SMTP_FROM: "${SMTP_FROM:-}"
     volumes:
       - tierlistrr-data:/data
+      # Sign-in allowlist, mounted read-only: one email (or @domain) per line,
+      # `#` for comments. WHITELIST_HOST_FILE is an ABSOLUTE path on the host,
+      # kept outside the repo (a redeploy may reclone it). The file must EXIST
+      # before the first `up`: Docker creates a directory in place of a missing
+      # file, and the app would then refuse every sign-in.
+      #   install -Dm644 /dev/null /srv/tierlistrr/whitelist.txt
+      #   echo 'you@example.com' >> /srv/tierlistrr/whitelist.txt
+      # Leave it unset for an open instance: /dev/null is mounted instead and
+      # never read, since WHITELIST_PATH stays undefined.
+      - "${WHITELIST_HOST_FILE:-/dev/null}:/config/whitelist.txt:ro"
     # Not using Traefik? Comment out `networks`/`labels` and expose a port:
     # ports:
     #   - "${TIERLISTRR_PORT:-3000}:3000"

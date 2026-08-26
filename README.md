@@ -94,7 +94,8 @@ what you need — everything is optional except `BETTER_AUTH_SECRET` in producti
 | `BETTER_AUTH_SECRET` | **Required in production** — random secret (`openssl rand -base64 32`) | — |
 | `BETTER_AUTH_URL` | **Public app URL** — must match the browser origin (cookies / CSRF). In `compose.yaml` it is auto-derived from `TIERLISTRR_HOST` | inferred from request |
 | `BETTER_AUTH_TRUSTED_ORIGINS` | Extra trusted origins, comma-separated (e.g. apex + `www`) | — |
-| `AUTH_ALLOWED_EMAILS` | Sign-in allowlist — emails and/or `@domains`, comma-separated. Empty = open | — |
+| `WHITELIST_PATH` | Path to the sign-in allowlist file (one email or `@domain` per line). Unset = open | — |
+| `WHITELIST_HOST_FILE` | `compose.yaml` only — **absolute host path** of that file; it is mounted at `/config/whitelist.txt` and sets `WHITELIST_PATH` | — |
 | `DATA_DIR` | Directory for the SQLite database **and** uploaded images | `./data` |
 | `DATABASE_URL` | Explicit libSQL URL (e.g. `file:/var/lib/tierlistrr/app.db`) | derived from `DATA_DIR` |
 | `PORT` | HTTP port | `3000` |
@@ -123,10 +124,29 @@ container output.
 > sign-out and other actions fail with `403 Invalid origin`. With the provided
 > `compose.yaml` this is handled automatically as long as `TIERLISTRR_HOST` is set.
 
-To make the app **invite-only**, set `AUTH_ALLOWED_EMAILS` to a comma-separated
-list of allowed addresses and/or domains (e.g.
-`alice@example.com, @yourteam.com`). Anyone not on the list can't request a code
-or create an account. Leave it empty for an open instance.
+To make the app **invite-only**, point `WHITELIST_PATH` at a text file listing
+who may sign in — one entry per line, exact addresses and/or domains, `#` for
+comments:
+
+```
+alice@example.com
+@yourteam.com     # anyone at yourteam.com
+```
+
+Anyone not on the list can't request a code or create an account. The file is
+re-read on every attempt, so adding someone needs no restart. Leave
+`WHITELIST_PATH` unset for an open instance; if it *is* set but the file can't
+be read (or lists nothing), every sign-in is refused rather than silently
+letting everyone in.
+
+With `compose.yaml`, set `WHITELIST_HOST_FILE` to the file's **absolute path on
+the host** instead — it is mounted read-only at `/config/whitelist.txt`. Create
+it before the first `up`, otherwise Docker creates a directory in its place:
+
+```bash
+install -Dm644 /dev/null /srv/tierlistrr/whitelist.txt
+echo 'you@example.com' >> /srv/tierlistrr/whitelist.txt
+```
 
 ### AI images (optional)
 
