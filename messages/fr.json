@@ -84,7 +84,8 @@
     "addTier": "Ajouter un tier",
     "allRanked": "Tout est classé — beau travail.",
     "noItems": "Aucun élément à classer.",
-    "editTierTitle": "Modifier ce tier"
+    "editTierTitle": "Modifier ce tier",
+    "outOfAverage": "Hors moyenne"
   },
   "addItem": {
     "title": "Ajouter un élément",
@@ -118,7 +119,9 @@
     "title": "Modifier le tier",
     "labelLabel": "Libellé",
     "colorLabel": "Couleur",
-    "deleteConfirm": "Supprimer ce tier ? Ses éléments retournent dans « à classer »."
+    "deleteConfirm": "Supprimer ce tier ? Ses éléments retournent dans « à classer ».",
+    "countsInAverageLabel": "Compte dans la moyenne",
+    "countsInAverageHint": "Décoche pour un tier hors classement (par ex. « jamais vu ») : les éléments qui y sont posés sont ignorés dans la moyenne."
   },
   "itemModal": {
     "title": "Élément",

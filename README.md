@@ -49,7 +49,8 @@ see [Self-hosting with Docker](#self-hosting-with-docker).
 
 - 🧱 **Tier lists** with custom tiers (label + color) and a drag-and-drop board
 - 👥 **Multi-user** — one shared list, one ranking per participant
-- 🏆 **Average leaderboard** — aggregated consensus ranking across participants
+- 🏆 **Average leaderboard** — aggregated consensus ranking across participants,
+  with tiers you can opt out of the average (e.g. a “never watched” row)
 - 🔗 **Public & shareable** — anyone can view via a link; sign in to participate
 - 🔑 **Passwordless auth** — email one-time code (better-auth)
 - 🖼️ **Images** — upload your own, or **generate them with AI**

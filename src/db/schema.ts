@@ -23,6 +23,11 @@ export const tiers = sqliteTable("tiers", {
   label: text("label").notNull(),
   color: text("color").notNull(),
   position: integer("position").notNull(),
+  // Opt a tier out of the average ranking (e.g. a "never watched" row): items
+  // parked there are ignored when the consensus view is computed.
+  countsInAverage: integer("counts_in_average", { mode: "boolean" })
+    .notNull()
+    .default(true),
 });
 
 export const items = sqliteTable("items", {

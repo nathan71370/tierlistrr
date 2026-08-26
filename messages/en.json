@@ -84,7 +84,8 @@
     "addTier": "Add a tier",
     "allRanked": "Everything's ranked — nice.",
     "noItems": "No items to rank.",
-    "editTierTitle": "Edit this tier"
+    "editTierTitle": "Edit this tier",
+    "outOfAverage": "Not averaged"
   },
   "addItem": {
     "title": "Add an item",
@@ -118,7 +119,9 @@
     "title": "Edit tier",
     "labelLabel": "Label",
     "colorLabel": "Color",
-    "deleteConfirm": "Delete this tier? Its items go back to \"to rank\"."
+    "deleteConfirm": "Delete this tier? Its items go back to \"to rank\".",
+    "countsInAverageLabel": "Counts toward the average",
+    "countsInAverageHint": "Uncheck for a tier outside the ranking (e.g. “never watched”): items parked there are ignored in the average."
   },
   "itemModal": {
     "title": "Item",

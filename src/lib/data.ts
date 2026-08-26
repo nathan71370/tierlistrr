@@ -128,7 +128,10 @@ export async function getTierlistView(
       a.label.localeCompare(b.label),
   );
 
-  const consensusAvailable = placedUsers.length > 0;
+  // Tiers opted out of the average (e.g. "never watched") are ignored when the
+  // consensus is computed, and never receive a consensus item either.
+  const countedTiers = tierRows.filter((t) => t.countsInAverage);
+  const consensusAvailable = placedUsers.length > 0 && countedTiers.length > 0;
   const valid = new Set(participants.map((p) => p.userId));
   let viewedUserId: string | null = null;
   if (requestedUserId === CONSENSUS_ID && consensusAvailable) viewedUserId = CONSENSUS_ID;
@@ -141,13 +144,15 @@ export async function getTierlistView(
   const placementMap: PlacementMap = {};
 
   if (isConsensus) {
-    // Average each item's tier index across everyone who ranked it (pool ignored),
-    // then drop it into the nearest tier — a consensus leaderboard.
+    // Average each item's rank across everyone who ranked it (pool and
+    // opted-out tiers ignored), then drop it into the nearest counted tier — a
+    // consensus leaderboard. Ranks run over the counted tiers only, so an
+    // excluded row in the middle doesn't distort the scale.
     const all = await db
       .select({ itemId: placements.itemId, tierId: placements.tierId })
       .from(placements)
       .where(eq(placements.tierlistId, tierlist.id));
-    const tierIndex = new Map(tierRows.map((t, i) => [t.id, i]));
+    const tierIndex = new Map(countedTiers.map((t, i) => [t.id, i]));
     const acc = new Map<string, number[]>();
     for (const p of all) {
       if (p.tierId && tierIndex.has(p.tierId)) {
@@ -159,8 +164,8 @@ export async function getTierlistView(
     const byTier = new Map<string, { itemId: string; avg: number }[]>();
     for (const [itemId, arr] of acc) {
       const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-      const idx = Math.min(tierRows.length - 1, Math.max(0, Math.round(avg)));
-      const tierId = tierRows[idx]?.id;
+      const idx = Math.min(countedTiers.length - 1, Math.max(0, Math.round(avg)));
+      const tierId = countedTiers[idx]?.id;
       if (!tierId) continue;
       const list = byTier.get(tierId) ?? [];
       list.push({ itemId, avg });
