@@ -1,73 +1,46 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Pencil } from "lucide-react";
-import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "@/components/ui/Button";
-import { SignInModal } from "./SignInModal";
-import { ProfileModal } from "./ProfileModal";
+import { useAuth } from "./AuthContext";
 
+/**
+ * No profile editing any more: the display name is the limperiam-auth pseudo,
+ * the source of truth for every app on the domain.
+ */
 export function HeaderAuth() {
   const t = useTranslations("header");
-  const { data, isPending, isRefetching } = useSession();
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [signingOut, startSignOut] = useTransition();
+  const ta = useTranslations("auth");
+  const { status, name, logoutAction, signIn } = useAuth();
 
-  const user = data?.user;
-  // better-auth re-checks the session every time the tab comes back to the
-  // foreground, and for a signed-out visitor that refetch flips isPending back
-  // to true. Only the very first load may swap the header for a skeleton:
-  // otherwise leaving the app to read the emailed code and coming back would
-  // unmount the modal below and throw that code entry away.
-  const loading = isPending && !isRefetching;
-
-  return (
-    <>
-      {loading ? (
-        <div className="h-9 w-28 animate-pulse rounded-full bg-cream-deep" />
-      ) : user ? (
-        <div className="flex items-center gap-2">
+  if (status === "ok" || status === "noAccess") {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="max-w-[100px] truncate text-sm text-ink-soft sm:max-w-[200px]">{name}</span>
+        {status === "noAccess" ? (
           <button
-            onClick={() => setProfileOpen(true)}
-            title={t("editName")}
-            className="group inline-flex max-w-[100px] items-center gap-1.5 text-sm text-ink-soft hover:text-ink sm:max-w-[200px]"
+            type="button"
+            onClick={signIn}
+            className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted hover:text-ink"
           >
-            <span className="truncate">{user.name?.trim() || user.email.split("@")[0]}</span>
-            <Pencil size={13} className="shrink-0 opacity-60 transition group-hover:opacity-100" />
+            {ta("readOnlyBadge")}
           </button>
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={signingOut}
-            onClick={() =>
-              startSignOut(async () => {
-                await signOut();
-                router.refresh();
-              })
-            }
-          >
+        ) : null}
+        {/* POST to limperiam-auth, never a link: its logout route refuses GET
+            so that an <img> on a third-party site can't sign people out of
+            every *.limperiam.com app. */}
+        <form method="post" action={logoutAction}>
+          <Button size="sm" variant="secondary" type="submit">
             {t("signOut")}
           </Button>
-          <ProfileModal
-            open={profileOpen}
-            onClose={() => setProfileOpen(false)}
-            initialName={user.name ?? ""}
-            email={user.email}
-          />
-        </div>
-      ) : (
-        <Button size="sm" onClick={() => setOpen(true)}>
-          {t("signIn")}
-        </Button>
-      )}
-      {/* Rendered whatever the session state is: a modal that only exists in
-          the signed-out branch loses everything typed into it the moment the
-          session is re-checked. */}
-      <SignInModal open={open && !user} onClose={() => setOpen(false)} />
-    </>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" onClick={signIn}>
+      {t("signIn")}
+    </Button>
   );
 }

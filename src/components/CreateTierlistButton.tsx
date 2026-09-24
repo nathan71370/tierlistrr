@@ -5,8 +5,7 @@ import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { createTierlist } from "@/lib/actions";
-import { useSession } from "@/lib/auth-client";
-import { SignInModal } from "./auth/SignInModal";
+import { useAuth } from "./auth/AuthContext";
 import { Modal } from "./ui/Modal";
 import { Button, buttonClasses } from "./ui/Button";
 import { Label, Input, Textarea } from "./ui/Field";
@@ -30,13 +29,12 @@ export function CreateTierlistButton({
   const t = useTranslations("create");
   const th = useTranslations("home");
   const tc = useTranslations("common");
-  const { data } = useSession();
+  const { status, signIn } = useAuth();
   const [open, setOpen] = useState(false);
-  const [signInOpen, setSignInOpen] = useState(false);
 
   function onClick() {
-    if (data?.user) setOpen(true);
-    else setSignInOpen(true);
+    if (status === "ok") setOpen(true);
+    else signIn();
   }
 
   return (
@@ -45,8 +43,6 @@ export function CreateTierlistButton({
         <Plus size={16} />
         {th("newList")}
       </Button>
-
-      <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
 
       <Modal open={open} onClose={() => setOpen(false)} title={t("title")}>
         <form action={createTierlist} className="space-y-4">

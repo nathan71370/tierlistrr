@@ -26,7 +26,7 @@ import { savePlacements, addTier } from "@/lib/actions";
 import { groupByPlacement, toPlacements, type Groups, type PlacementMap } from "@/lib/board";
 import { POOL_ID, CONSENSUS_ID } from "@/lib/constants";
 import { Button, buttonClasses } from "@/components/ui/Button";
-import { SignInModal } from "@/components/auth/SignInModal";
+import { useAuth } from "@/components/auth/AuthContext";
 import { ItemThumb } from "./ItemTile";
 import { AddItemModal } from "./AddItemModal";
 import { GenerateItemsModal } from "./GenerateItemsModal";
@@ -81,7 +81,7 @@ export function TierBoard({
   const [addOpen, setAddOpen] = useState(false);
   const [genOpen, setGenOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [signInOpen, setSignInOpen] = useState(false);
+  const { signIn } = useAuth();
   const [editTier, setEditTier] = useState<Tier | null>(null);
   const [editItem, setEditItem] = useState<Item | null>(null);
   const [addingTier, startAddTier] = useTransition();
@@ -280,7 +280,7 @@ export function TierBoard({
           <span className="inline-flex items-center gap-2 text-sm text-ink-soft">
             <Eye size={15} /> {t("readOnlySignedOut")}
           </span>
-          <Button size="sm" onClick={() => setSignInOpen(true)}>
+          <Button size="sm" onClick={signIn}>
             <LogIn size={15} /> {th("signIn")}
           </Button>
         </div>
@@ -401,7 +401,6 @@ export function TierBoard({
       </DragDropContext>
 
       {/* Modals */}
-      <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
       {isOwner ? (
         <>
           <AddItemModal

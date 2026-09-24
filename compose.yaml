@@ -1,12 +1,9 @@
 # Docker Compose stack for tierlistrr.
 #
-# Domain / secrets are NOT hardcoded here — set them in your platform's
-# environment (or a .env file next to this compose). Minimum to set:
-#   BETTER_AUTH_SECRET   (required, random string)
-#   TIERLISTRR_HOST      (your public hostname, for the Traefik router rule)
-#   BETTER_AUTH_URL      (your public URL, e.g. https://$TIERLISTRR_HOST)
-#   WHITELIST_HOST_FILE  (absolute host path of the sign-in allowlist, optional)
-# Optional: SMTP_* (email OTP), GROQ_API_KEY / POLLINATIONS_TOKEN (AI).
+# `limperiam` branch: sign-in is delegated to limperiam-auth (see README).
+# Minimum to set: TIERLISTRR_HOST (public hostname, for the Traefik router).
+# The AUTH_* defaults below fit *.limperiam.com. Optional: GROQ_API_KEY /
+# POLLINATIONS_TOKEN (AI).
 #
 # The Traefik labels assume an external "traefik" network and TLS via the
 # "websecure" entrypoint. Remove them and uncomment `ports` below if you don't
@@ -15,7 +12,8 @@ services:
   tierlistrr:
     container_name: tierlistrr
     # Use the prebuilt image from GitHub Container Registry (recommended):
-    image: ghcr.io/nathan71370/tierlistrr:latest
+    # The `limperiam` branch image — `:latest` is the generic build from main.
+    image: ghcr.io/nathan71370/tierlistrr:limperiam
     # ...or build locally instead: comment out `image` above, uncomment `build`,
     # and run `docker compose up -d --build`.
     # build:
@@ -28,34 +26,17 @@ services:
       GROQ_MODEL: "${GROQ_MODEL:-llama-3.3-70b-versatile}"
       GROQ_BASE_URL: "${GROQ_BASE_URL:-https://api.groq.com/openai/v1}"
       POLLINATIONS_TOKEN: "${POLLINATIONS_TOKEN:-}"
-      # Auth (better-auth). BETTER_AUTH_SECRET is REQUIRED in prod (random string).
-      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:-}"
-      # Public URL — must match the browser origin (CSRF). Auto-derived from
-      # TIERLISTRR_HOST; override BETTER_AUTH_URL if your scheme/host differ.
-      BETTER_AUTH_URL: "${BETTER_AUTH_URL:-https://${TIERLISTRR_HOST}}"
-      # Optional extra trusted origins, comma-separated (e.g. apex + www).
-      BETTER_AUTH_TRUSTED_ORIGINS: "${BETTER_AUTH_TRUSTED_ORIGINS:-}"
-      # Optional sign-in allowlist. Only defined when WHITELIST_HOST_FILE is
-      # set below — an undefined WHITELIST_PATH means "open to everyone".
-      WHITELIST_PATH: "${WHITELIST_HOST_FILE:+/config/whitelist.txt}"
-      # Email OTP delivery (e.g. Gmail: smtp.gmail.com + app password).
-      SMTP_HOST: "${SMTP_HOST:-}"
-      SMTP_PORT: "${SMTP_PORT:-587}"
-      SMTP_USER: "${SMTP_USER:-}"
-      SMTP_PASS: "${SMTP_PASS:-}"
-      SMTP_FROM: "${SMTP_FROM:-}"
+      # Session checks against limperiam-auth, over the `traefik` Docker
+      # network both stacks are attached to.
+      AUTH_INTERNAL_URL: "${AUTH_INTERNAL_URL:-http://limperiam-auth:3000}"
+      # Sign-in / sign-out target, browser side. Must be https (Secure cookie).
+      AUTH_PUBLIC_URL: "${AUTH_PUBLIC_URL:-https://auth.limperiam.com}"
+      # This app's slug in the limperiam-auth catalogue: writing is open to the
+      # groups the admin opened THIS card to. Change only if the card has
+      # another id in /admin.
+      AUTH_APP_SLUG: "${AUTH_APP_SLUG:-tierlistrr}"
     volumes:
       - tierlistrr-data:/data
-      # Sign-in allowlist, mounted read-only: one email (or @domain) per line,
-      # `#` for comments. WHITELIST_HOST_FILE is an ABSOLUTE path on the host,
-      # kept outside the repo (a redeploy may reclone it). The file must EXIST
-      # before the first `up`: Docker creates a directory in place of a missing
-      # file, and the app would then refuse every sign-in.
-      #   install -Dm644 /dev/null /srv/tierlistrr/whitelist.txt
-      #   echo 'you@example.com' >> /srv/tierlistrr/whitelist.txt
-      # Leave it unset for an open instance: /dev/null is mounted instead and
-      # never read, since WHITELIST_PATH stays undefined.
-      - "${WHITELIST_HOST_FILE:-/dev/null}:/config/whitelist.txt:ro"
     # Not using Traefik? Comment out `networks`/`labels` and expose a port:
     # ports:
     #   - "${TIERLISTRR_PORT:-3000}:3000"

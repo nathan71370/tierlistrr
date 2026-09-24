@@ -1,14 +1,13 @@
 "use server";
 
 import { nanoid } from "nanoid";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { tierlists, tiers, items, placements } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { getAuthState } from "@/lib/viewer";
 
 const et = () => getTranslations("errors");
 import { slugify } from "@/lib/slug";
@@ -17,10 +16,12 @@ import { generateItemNames } from "@/lib/ai";
 import { saveImageFile, removeImage } from "@/lib/images";
 import { enqueueImage } from "@/lib/imageQueue";
 
+// Writing needs a limperiam-auth session AND the app opened to one of the
+// person's groups. Reading stays public — it never goes through here.
 async function requireUser() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) throw new Error((await et())("signInRequired"));
-  return session.user;
+  const { status, viewer } = await getAuthState();
+  if (status !== "ok" || !viewer) throw new Error((await et())("signInRequired"));
+  return viewer;
 }
 
 // Owner-only guard: management of items and tiers belongs to the list's creator.

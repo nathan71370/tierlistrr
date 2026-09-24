@@ -12,8 +12,7 @@
   },
   "header": {
     "signIn": "Sign in",
-    "signOut": "Sign out",
-    "editName": "Edit your name"
+    "signOut": "Sign out"
   },
   "home": {
     "kicker": "Collaborative tier lists",
@@ -39,28 +38,12 @@
     "creating": "Creating…"
   },
   "auth": {
-    "title": "Sign in",
-    "emailIntro": "Enter your email and we'll send a 6-digit code. No password, and it creates your account if you don't have one yet.",
-    "emailLabel": "Email",
-    "emailPlaceholder": "you@example.com",
-    "sendCode": "Send code",
-    "sending": "Sending…",
-    "codeSentTo": "Code sent to {email}.",
-    "codeLabel": "6-digit code",
-    "changeEmail": "← Change email",
-    "verify": "Sign in",
-    "verifying": "Verifying…",
-    "errorSend": "Couldn't send the code.",
-    "errorVerify": "Invalid or expired code.",
-    "errorNotAllowed": "This email isn't authorized to sign in."
-  },
-  "profile": {
-    "title": "Your profile",
-    "loggedInAs": "Signed in as {email}.",
-    "nameLabel": "Display name",
-    "namePlaceholder": "e.g. Nathan",
-    "nameHint": "This is the name shown on your rankings and lists.",
-    "errorUpdate": "Update failed."
+    "noAccessTitle": "Read-only",
+    "noAccessBody": "You're signed in, but tierlistrr isn't open to you for editing. You can browse everything; to rank and create lists, ask the admin for access.",
+    "unavailableTitle": "Sign-in unavailable",
+    "unavailableBody": "The sign-in service isn't answering right now. You can keep browsing; try signing in again in a moment.",
+    "readOnlyBadge": "read-only",
+    "ok": "OK"
   },
   "board": {
     "backToLists": "All lists",

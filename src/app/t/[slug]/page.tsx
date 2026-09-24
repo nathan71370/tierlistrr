@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import { getTierlistView } from "@/lib/data";
-import { auth } from "@/lib/auth";
+import { getAuthState } from "@/lib/viewer";
 import { isAiConfigured } from "@/lib/ai";
 import { SiteHeader } from "@/components/SiteHeader";
+import { AuthBoundary } from "@/components/auth/AuthBoundary";
 import { TierBoard } from "@/components/board/TierBoard";
 
 export const dynamic = "force-dynamic";
@@ -19,14 +19,15 @@ export default async function TierlistPage({
   const sp = await searchParams;
   const requestedUserId = typeof sp.u === "string" ? sp.u : null;
 
-  const session = await auth.api.getSession({ headers: await headers() });
-  const currentUserId = session?.user?.id ?? null;
+  // Anyone may read; only a viewer with access gets an id here, and with it
+  // the right to rank and edit.
+  const currentUserId = (await getAuthState()).viewer?.id ?? null;
 
   const view = await getTierlistView(slug, { currentUserId, requestedUserId });
   if (!view) notFound();
 
   return (
-    <>
+    <AuthBoundary>
       <SiteHeader />
       <TierBoard
         tierlist={view.tierlist}
@@ -44,6 +45,6 @@ export default async function TierlistPage({
         consensusAvailable={view.consensusAvailable}
         aiEnabled={isAiConfigured()}
       />
-    </>
+    </AuthBoundary>
   );
 }

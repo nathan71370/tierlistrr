@@ -12,8 +12,7 @@
   },
   "header": {
     "signIn": "Se connecter",
-    "signOut": "Déconnexion",
-    "editName": "Modifier ton nom"
+    "signOut": "Déconnexion"
   },
   "home": {
     "kicker": "Tier lists collaboratives",
@@ -39,28 +38,12 @@
     "creating": "Création…"
   },
   "auth": {
-    "title": "Connexion",
-    "emailIntro": "Entre ton email : on t'envoie un code à 6 chiffres. Pas de mot de passe, et ça crée ton compte si tu n'en as pas encore.",
-    "emailLabel": "Email",
-    "emailPlaceholder": "toi@exemple.com",
-    "sendCode": "Recevoir le code",
-    "sending": "Envoi…",
-    "codeSentTo": "Code envoyé à {email}.",
-    "codeLabel": "Code à 6 chiffres",
-    "changeEmail": "← Changer d'email",
-    "verify": "Se connecter",
-    "verifying": "Vérification…",
-    "errorSend": "Échec de l'envoi du code.",
-    "errorVerify": "Code invalide ou expiré.",
-    "errorNotAllowed": "Cet email n'est pas autorisé à se connecter."
-  },
-  "profile": {
-    "title": "Ton profil",
-    "loggedInAs": "Connecté en tant que {email}.",
-    "nameLabel": "Nom affiché",
-    "namePlaceholder": "ex. Nathan",
-    "nameHint": "C'est ce nom qui apparaît sur tes classements et tes listes.",
-    "errorUpdate": "Échec de la mise à jour."
+    "noAccessTitle": "Lecture seule",
+    "noAccessBody": "Ton compte est bien connecté, mais tierlistrr ne t'est pas ouvert en écriture. Tu peux tout consulter ; pour classer et créer des listes, demande à l'admin de te donner l'accès.",
+    "unavailableTitle": "Connexion indisponible",
+    "unavailableBody": "Le service de connexion ne répond pas pour l'instant. Tu peux continuer à consulter les listes ; réessaie de te connecter dans un moment.",
+    "readOnlyBadge": "lecture seule",
+    "ok": "OK"
   },
   "board": {
     "backToLists": "Toutes les listes",

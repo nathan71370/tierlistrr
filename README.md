@@ -1,5 +1,30 @@
 # tierlistrr
 
+> **You are on the `limperiam` branch.** It is the build used on
+> `*.limperiam.com`, where sign-in is delegated to
+> limperiam-auth, the single sign-on shared by every app of that domain
+> (through its public client,
+> [limperiam-auth-client](https://github.com/nathan71370/limperiam-auth-client)). It replaces better-auth,
+> the email OTP, the allowlist and SMTP entirely — the sections below that
+> mention them describe `main`, the generic self-hostable version, which is
+> unaffected. Image: `ghcr.io/nathan71370/tierlistrr:limperiam`.
+>
+> On this branch:
+> - **Reading is public**: anyone can open the lists and every ranking.
+> - **Writing** (creating lists, ranking, editing) needs a limperiam-auth
+>   session *and* the app opened to one of the person's groups in the SSO
+>   catalogue (slug `tierlistrr`, or `AUTH_APP_SLUG`). Admins always can.
+>   Someone signed in without access stays read-only, with an explanation.
+> - Display names are the SSO pseudo. Existing accounts are matched by email
+>   (case-insensitive), so every list and ranking keeps its owner.
+> - Configuration: `AUTH_INTERNAL_URL` (default `http://limperiam-auth:3000`,
+>   over the Docker `traefik` network), `AUTH_PUBLIC_URL` (default
+>   `https://auth.limperiam.com`, must be https), `AUTH_APP_SLUG` (default
+>   `tierlistrr`). `BETTER_AUTH_*`, `WHITELIST_*` and `SMTP_*` are unused.
+>
+> Keeping this branch current: merge `main` into it. Conflicts, if any, are
+> confined to the auth files.
+
 Create, share and rank **anything** as a tier list — cheeses, hot sauces,
 cocktails, movies… Each tier list is a shared subject: the creator adds the
 items, and **every signed-in participant builds their own ranking** by dragging

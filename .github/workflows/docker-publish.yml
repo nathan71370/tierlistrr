@@ -2,7 +2,9 @@ name: Publish Docker image
 
 on:
   push:
-    branches: [main]
+    # `limperiam` gets its own image tag (`:limperiam`, from `type=ref,event=branch`
+    # below); `:latest` stays reserved to main by `is_default_branch`.
+    branches: [main, limperiam]
     tags: ["v*"]
   workflow_dispatch:
 

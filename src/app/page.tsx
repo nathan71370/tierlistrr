@@ -1,20 +1,20 @@
-import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { getAllTierlists } from "@/lib/data";
-import { auth } from "@/lib/auth";
+import { getAuthState } from "@/lib/viewer";
 import { SiteHeader } from "@/components/SiteHeader";
+import { AuthBoundary } from "@/components/auth/AuthBoundary";
 import { CreateTierlistButton } from "@/components/CreateTierlistButton";
 import { TierlistCard } from "@/components/TierlistCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [lists, session, t] = await Promise.all([
+  const [lists, auth, t] = await Promise.all([
     getAllTierlists(),
-    auth.api.getSession({ headers: await headers() }),
+    getAuthState(),
     getTranslations("home"),
   ]);
-  const currentUserId = session?.user?.id ?? null;
+  const currentUserId = auth.viewer?.id ?? null;
 
   const richTags = {
     em: (c: React.ReactNode) => <em>{c}</em>,
@@ -22,7 +22,7 @@ export default async function Home() {
   };
 
   return (
-    <>
+    <AuthBoundary>
       <SiteHeader />
       <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-12 sm:py-16">
         <section className="relative mb-14 border-b border-line pb-12">
@@ -70,6 +70,6 @@ export default async function Home() {
           <span className="text-[11px] text-muted">{t("footerTagline")}</span>
         </div>
       </footer>
-    </>
+    </AuthBoundary>
   );
 }
