@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import "./globals.css";
+import { PwaRegister } from "@/components/PwaRegister";
 
 // Self-hosted to avoid any network dependency (Google Fonts is unreachable here).
 const inter = localFont({
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
   title: "Tierlistrr — crée tes tier lists",
   description:
     "Crée, visualise et range n'importe quelle tier list (fromages, sauces piquantes, cocktails…) en glissant les éléments.",
+  applicationName: "Tierlistrr",
+  appleWebApp: { capable: true, title: "Tierlistrr", statusBarStyle: "default" },
 };
 
 // App-like feel on mobile: no pinch / double-tap zoom.
@@ -41,6 +44,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: "#f7f5f0",
 };
 
 export default async function RootLayout({
@@ -54,8 +58,12 @@ export default async function RootLayout({
       lang={locale}
       className={`${inter.variable} ${instrumentSerif.variable} h-full`}
     >
+      <head>
+        <link rel="manifest" href="/manifest.webmanifest" crossOrigin="use-credentials" />
+      </head>
       <body className="min-h-full flex flex-col bg-paper text-ink">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <PwaRegister />
       </body>
     </html>
   );
